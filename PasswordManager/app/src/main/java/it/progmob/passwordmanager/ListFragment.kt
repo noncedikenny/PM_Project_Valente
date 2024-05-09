@@ -1,5 +1,6 @@
 package it.progmob.passwordmanager
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -21,16 +22,18 @@ class ListFragment : Fragment() {
         return inflater.inflate(R.layout.list_fragment, container, false)
     }
 
+    val passwordList: ArrayList<Password> = ArrayList()
+
+    @SuppressLint("NotifyDataSetChanged")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         val addPassword: Button = view.findViewById(R.id.addPassword)
-        val passwordList: ArrayList<Password> = ArrayList()
 
         val adapter = PasswordAdapter(passwordList)
         val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
-        //val layoutManager = LinearLayoutManager(requireContext())
-        //recyclerView.layoutManager = layoutManager
+        val layoutManager = LinearLayoutManager(requireContext())
+        recyclerView.layoutManager = layoutManager
         recyclerView.adapter = adapter
 
         addPassword.setOnClickListener {
@@ -40,7 +43,6 @@ class ListFragment : Fragment() {
             dialogBuilder.setView(viewInflated)
             dialogBuilder.setTitle("Add a password")
             dialogBuilder.setCancelable(false)
-
 
             // Buttons
             dialogBuilder.setPositiveButton("Submit") { _, _ -> }
@@ -69,9 +71,8 @@ class ListFragment : Fragment() {
                 else {
                     val newPassword = Password(siteNameItem.text.toString(), usernameItem.text.toString(), passwordItem.text.toString())
                     passwordList.add(newPassword)
-                    if(passwordList.isNotEmpty()) {
-                        Toast.makeText(requireContext(), "There's a password!", Toast.LENGTH_SHORT).show()
-                    }
+                    val adapter2 = recyclerView.adapter as? PasswordAdapter
+                    adapter2?.notifyDataSetChanged()
                     alertDialog.dismiss()
                 }
             }

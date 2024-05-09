@@ -26,9 +26,9 @@ class PasswordAdapter(private val passwords: ArrayList<Password>) :
 
     override fun onBindViewHolder(holder: PasswordAdapter.ViewHolder, position: Int) {
         val password = passwords[position]
-        holder.siteNameView.text = password.siteName
-        holder.usernameView.text = password.username
-        holder.passwordView.text = password.password
+        holder.siteNameView.text = "Site Name: " + password.siteName
+        holder.usernameView.text = "Username: " + password.username
+        holder.passwordView.text = "Password: " + password.password
         holder.positionView.text = (position + 1).toString()
     }
 
