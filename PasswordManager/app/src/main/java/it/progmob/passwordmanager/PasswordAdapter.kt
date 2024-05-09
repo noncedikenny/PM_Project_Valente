@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class PasswordAdapter(private val passwords: List<Password>) :
+class PasswordAdapter(private val passwords: ArrayList<Password>) :
     RecyclerView.Adapter<PasswordAdapter.ViewHolder>() {
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val siteNameView: TextView = itemView.findViewById(R.id.siteName)
@@ -19,7 +19,8 @@ class PasswordAdapter(private val passwords: List<Password>) :
         parent: ViewGroup,
         viewType: Int
     ): PasswordAdapter.ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.recycler_view_item, parent, false)
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.recycler_view_item, parent, false)
         return ViewHolder(view)
     }
 
@@ -31,8 +32,6 @@ class PasswordAdapter(private val passwords: List<Password>) :
         holder.positionView.text = (position + 1).toString()
     }
 
-    override fun getItemCount(): Int {
-        return passwords.size
-    }
+    override fun getItemCount() = passwords.size
 
 }

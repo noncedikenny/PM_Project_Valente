@@ -27,6 +27,12 @@ class ListFragment : Fragment() {
         val addPassword: Button = view.findViewById(R.id.addPassword)
         val passwordList: ArrayList<Password> = ArrayList()
 
+        val adapter = PasswordAdapter(passwordList)
+        val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
+        //val layoutManager = LinearLayoutManager(requireContext())
+        //recyclerView.layoutManager = layoutManager
+        recyclerView.adapter = adapter
+
         addPassword.setOnClickListener {
             // Setup builder to build the popup
             val dialogBuilder = AlertDialog.Builder(requireContext())
@@ -76,13 +82,6 @@ class ListFragment : Fragment() {
                 passwordItem.setText(randomPassword)
             }
         }
-
-        val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
-        val layoutManager = LinearLayoutManager(requireContext())
-        recyclerView.layoutManager = layoutManager
-
-        val adapter = PasswordAdapter(passwordList)
-        recyclerView.adapter = adapter
     }
 }
 
