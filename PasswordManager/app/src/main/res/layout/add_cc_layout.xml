@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="350dp"
+    android:layout_height="350dp">
+
+    <EditText
+        android:id="@+id/cardNumberInput"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_marginTop="64dp"
+        android:ems="10"
+        android:hint="Card number"
+        android:inputType="number"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/cardSafetyCodeInput"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_marginTop="16dp"
+        android:ems="10"
+        android:hint="Safety code"
+        android:inputType="number"
+        app:layout_constraintEnd_toEndOf="@+id/cardNumberInput"
+        app:layout_constraintStart_toStartOf="@+id/cardNumberInput"
+        app:layout_constraintTop_toBottomOf="@+id/cardNumberInput" />
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -6,42 +6,71 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import it.progmob.passwordmanager.databinding.ListFragmentBinding
+import kotlin.properties.Delegates
 
 class ListFragment : Fragment() {
+
+    //binding connected to the specific layout of the fragment
+    private lateinit var binding: ListFragmentBinding
+
+    // Use of viewModel among fragments to share data
+    private val viewModel : ManagerViewModel by activityViewModels()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.list_fragment, container, false)
+        (activity as AppCompatActivity).supportActionBar?.title = "Setup an item"
+        binding = ListFragmentBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-    val passwordList: ArrayList<Password> = ArrayList()
-
-    @SuppressLint("NotifyDataSetChanged")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val addPassword: Button = view.findViewById(R.id.addPassword)
+        binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        val adapter = PasswordAdapter(passwordList)
-        val recyclerView: RecyclerView = view.findViewById(R.id.recyclerView)
-        val layoutManager = LinearLayoutManager(requireContext())
-        recyclerView.layoutManager = layoutManager
-        recyclerView.adapter = adapter
+        when (viewModel.imageClicked) {
+            1 -> viewModel.passwordList.observe(viewLifecycleOwner) { passwordList ->
+                binding.recyclerView.adapter = PasswordAdapter(passwordList)
+            }
+            2 -> viewModel.pinList.observe(viewLifecycleOwner) { pinList ->
+                binding.recyclerView.adapter = PinAdapter(pinList)
+            }
+            3 -> viewModel.ccList.observe(viewLifecycleOwner) { ccList ->
+                binding.recyclerView.adapter = CCAdapter(ccList)
+            }
+        }
 
-        addPassword.setOnClickListener {
+        binding.addItem.setOnClickListener {
             // Setup builder to build the popup
             val dialogBuilder = AlertDialog.Builder(requireContext())
-            val viewInflated: View = LayoutInflater.from(requireContext()).inflate(R.layout.add_popup_layout, requireView() as ViewGroup, false)
+            lateinit var viewInflated: View
+
+            when (viewModel.imageClicked) {
+                1 -> {
+                    viewInflated = LayoutInflater.from(requireContext()).inflate(R.layout.add_password_layout, null, false)
+                }
+                2 -> {
+                    viewInflated = LayoutInflater.from(requireContext()).inflate(R.layout.add_pin_layout, null, false)
+                }
+                3 -> {
+                    viewInflated = LayoutInflater.from(requireContext()).inflate(R.layout.add_cc_layout, null, false)
+                }
+                else -> Toast.makeText(requireContext(), "0", Toast.LENGTH_SHORT).show()
+            }
+
             dialogBuilder.setView(viewInflated)
-            dialogBuilder.setTitle("Add a password")
+            dialogBuilder.setTitle("Setup item")
             dialogBuilder.setCancelable(false)
 
             // Buttons
@@ -49,7 +78,9 @@ class ListFragment : Fragment() {
             dialogBuilder.setNegativeButton("Cancel") { dialog, _ ->
                 dialog.cancel()
             }
-            dialogBuilder.setNeutralButton("Generate Password") {_, _ ->}
+            if(viewModel.imageClicked != 3) {
+                dialogBuilder.setNeutralButton("Generate Random") { _, _ -> }
+            }
 
             // Create popup
             val alertDialog = dialogBuilder.create()
@@ -57,36 +88,73 @@ class ListFragment : Fragment() {
 
             alertDialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setOnClickListener {
                 // Bind input
-                val siteNameItem: EditText = viewInflated.findViewById(R.id.siteNameInput)
-                val usernameItem: EditText = viewInflated.findViewById(R.id.usernameInput)
-                val passwordItem: EditText = viewInflated.findViewById(R.id.passwordInput)
-                val passwordRegex = Regex("(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#\$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,}")
+                var somethingIsEmpty = false
+                viewInflated.findViewById<EditText>(R.id.siteNameInput)?.let {
+                    if (it.text.toString().isEmpty()) {
+                        somethingIsEmpty = true
+                    }
+                }
+                viewInflated.findViewById<EditText>(R.id.usernameInput)?.let {
+                    if (it.text.toString().isEmpty()) {
+                        somethingIsEmpty = true
+                    }
+                }
+                viewInflated.findViewById<EditText>(R.id.passwordInput)?.let {
+                    if (it.text.toString().isEmpty()) {
+                        somethingIsEmpty = true
+                    }
+                }
 
-                if (siteNameItem.text.toString().isEmpty() || usernameItem.text.toString().isEmpty() || passwordItem.text.toString().isEmpty()) {
+                if (somethingIsEmpty) {
                     Toast.makeText(requireContext(), "Every field must be filled.", Toast.LENGTH_SHORT).show()
-                }
-                else if (!passwordRegex.matches(passwordItem.text.toString())) {
-                    Toast.makeText(requireContext(), "Password's weak.", Toast.LENGTH_SHORT).show()
-                }
-                else {
-                    val newPassword = Password(siteNameItem.text.toString(), usernameItem.text.toString(), passwordItem.text.toString())
-                    passwordList.add(newPassword)
-                    val adapter2 = recyclerView.adapter as? PasswordAdapter
-                    adapter2?.notifyDataSetChanged()
+                } else {
+                    if(viewModel.imageClicked == 1) {
+                        val newItem = Password(
+                            viewInflated.findViewById<EditText>(R.id.siteNameInput).text.toString(),
+                            viewInflated.findViewById<EditText>(R.id.usernameInput).text.toString(),
+                            viewInflated.findViewById<EditText>(R.id.passwordInput).text.toString())
+                        viewModel.addItem(newItem)
+                        viewModel.passwordList.observe(viewLifecycleOwner) { passwordList ->
+                            binding.recyclerView.adapter = PasswordAdapter(passwordList)
+                        }
+                    }
+                    else if(viewModel.imageClicked == 2) {
+                        val newItem = Pin(
+                            viewInflated.findViewById<EditText>(R.id.pinDescriptionInput).text.toString(),
+                            viewInflated.findViewById<EditText>(R.id.pinInput).text.toString())
+                        viewModel.addItem(newItem)
+                        viewModel.pinList.observe(viewLifecycleOwner) { pinList ->
+                            binding.recyclerView.adapter = PinAdapter(pinList)
+                        }
+                    }
+                    else if(viewModel.imageClicked == 3) {
+                        val newItem = CreditCard(
+                            viewInflated.findViewById<EditText>(R.id.cardNumberInput).text.toString(),
+                            viewInflated.findViewById<EditText>(R.id.cardSafetyCodeInput).text.toString())
+                        viewModel.addItem(newItem)
+                        viewModel.ccList.observe(viewLifecycleOwner) { ccList ->
+                            binding.recyclerView.adapter = CCAdapter(ccList)
+                        }
+                    }
+
                     alertDialog.dismiss()
                 }
             }
 
-            alertDialog.getButton(AlertDialog.BUTTON_NEUTRAL)?.setOnClickListener {
-                val passwordItem: EditText = viewInflated.findViewById(R.id.passwordInput)
-                val randomPassword = generateRandomPassword(12)
-                passwordItem.setText(randomPassword)
+            if (viewModel.imageClicked == 1 || viewModel.imageClicked == 2) {
+                alertDialog.getButton(AlertDialog.BUTTON_NEUTRAL)?.setOnClickListener {
+                    val random = generateRandom(12)
+                    val item: EditText = if (viewModel.imageClicked == 1) viewInflated.findViewById(R.id.passwordInput)
+                    else viewInflated.findViewById(R.id.pinInput)
+                    item.setText(random)
+                }
             }
         }
     }
+
 }
 
-fun generateRandomPassword(length: Int): String {
+fun generateRandom(length: Int): String {
     val lowercaseChars = ('a'..'z').toList()
     val uppercaseChars = ('A'..'Z').toList()
     val digitChars = ('0'..'9').toList()

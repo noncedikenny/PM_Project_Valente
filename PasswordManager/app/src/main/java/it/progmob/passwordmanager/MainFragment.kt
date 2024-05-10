@@ -4,40 +4,50 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.Navigation
+import androidx.recyclerview.widget.LinearLayoutManager
+import it.progmob.passwordmanager.databinding.MainFragmentBinding
 
 class MainFragment : Fragment() {
+
+    //binding connected to the specific layout of the fragment
+    private lateinit var binding: MainFragmentBinding
+
+    // Use of viewModel among fragments to share data
+    private val viewModel : ManagerViewModel by activityViewModels()
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.main_fragment, container, false)
+        // Inflate the layout using data binding
+        (activity as AppCompatActivity).supportActionBar?.title = "Main menu"
+        binding = MainFragmentBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val passwordIcon: ImageView = view.findViewById(R.id.passwordImageView)
-        val pinIcon: ImageView = view.findViewById(R.id.pinImageView)
-        val ccIcon: ImageView = view.findViewById(R.id.ccImageView)
-        val settingsIcon: ImageView = view.findViewById(R.id.settingsImageView)
 
-        passwordIcon.setOnClickListener {
+        binding.passwordImageView.setOnClickListener {
             Navigation.findNavController(view).navigate(R.id.action_mainFragment_to_listFragment)
+            viewModel.imageClicked = 1
         }
 
-        pinIcon.setOnClickListener {
-            Toast.makeText(requireContext(), "Pin", Toast.LENGTH_SHORT).show()
+        binding.pinImageView.setOnClickListener {
+            Navigation.findNavController(view).navigate(R.id.action_mainFragment_to_listFragment)
+            viewModel.imageClicked = 2
         }
 
-        ccIcon.setOnClickListener {
-            Toast.makeText(requireContext(), "CC", Toast.LENGTH_SHORT).show()
+        binding.ccImageView.setOnClickListener {
+            Navigation.findNavController(view).navigate(R.id.action_mainFragment_to_listFragment)
+            viewModel.imageClicked = 3
         }
 
-        settingsIcon.setOnClickListener {
+        binding.settingsImageView.setOnClickListener {
             Toast.makeText(requireContext(), "Settings", Toast.LENGTH_SHORT).show()
         }
     }
