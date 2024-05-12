@@ -114,6 +114,16 @@ class ManagerViewModel : ViewModel() {
         _ccList.value = ccList
     }
 
+    fun reset() {
+        val passwordList: ArrayList<Password> = ArrayList()
+        val pinList: ArrayList<Pin> = ArrayList()
+        val ccList: ArrayList<CreditCard> = ArrayList()
+
+        _passwordList.value = passwordList
+        _pinList.value = pinList
+        _ccList.value = ccList
+    }
+
     fun fetchDataFromDatabase() {
         val db = Firebase.firestore
 

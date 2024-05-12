@@ -51,7 +51,7 @@ class ListFragment : Fragment() {
             2 -> viewModel.pinList.observe(viewLifecycleOwner) { pinList ->
                 binding.recyclerView.adapter = PinAdapter(pinList) {
                     val db = Firebase.firestore
-                    db.collection("Passwords").document(it.description).delete()
+                    db.collection("Pins").document(it.description).delete()
                     viewModel.removeItem(it)
                 }
             }
@@ -59,7 +59,7 @@ class ListFragment : Fragment() {
             3 -> viewModel.ccList.observe(viewLifecycleOwner) { ccList ->
                 binding.recyclerView.adapter = CCAdapter(ccList) {
                     val db = Firebase.firestore
-                    db.collection("Passwords").document(it.number).delete()
+                    db.collection("CreditCards").document(it.number).delete()
                     viewModel.removeItem(it)
                 }
             }
@@ -132,7 +132,7 @@ class ListFragment : Fragment() {
                         db.collection("Pins").document(newItem.description).set(newItem)
                         viewModel.pinList.observe(viewLifecycleOwner) { pinList ->
                             binding.recyclerView.adapter = PinAdapter(pinList) {
-                                db.collection("Passwords").document(it.description).delete()
+                                db.collection("Pins").document(it.description).delete()
                                 viewModel.removeItem(it)
                             }
                         }
@@ -145,7 +145,7 @@ class ListFragment : Fragment() {
                         db.collection("CreditCards").document(newItem.number).set(newItem)
                         viewModel.ccList.observe(viewLifecycleOwner) { ccList ->
                             binding.recyclerView.adapter = CCAdapter(ccList) {
-                                db.collection("Passwords").document(it.number).delete()
+                                db.collection("CreditCards").document(it.number).delete()
                                 viewModel.removeItem(it)
                             }
                         }

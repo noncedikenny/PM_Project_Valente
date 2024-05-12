@@ -11,9 +11,16 @@
         <action
             android:id="@+id/action_mainFragment_to_listFragment"
             app:destination="@id/listFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
     </fragment>
     <fragment
         android:id="@+id/listFragment"
         android:name="it.progmob.passwordmanager.ListFragment"
         android:label="ListFragment" />
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="it.progmob.passwordmanager.SettingsFragment"
+        android:label="SettingsFragment" />
 </navigation>

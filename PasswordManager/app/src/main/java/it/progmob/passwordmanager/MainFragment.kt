@@ -47,7 +47,7 @@ class MainFragment : Fragment() {
         }
 
         binding.settingsImageView.setOnClickListener {
-            Toast.makeText(requireContext(), "Settings", Toast.LENGTH_SHORT).show()
+            Navigation.findNavController(view).navigate(R.id.action_mainFragment_to_settingsFragment)
         }
     }
 }
