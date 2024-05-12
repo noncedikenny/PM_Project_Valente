@@ -6,8 +6,9 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class PasswordAdapter(private val passwords: List<Password>) :
+class PasswordAdapter(private val passwords: List<Password>, val clickListener: (Password) -> Unit) :
     RecyclerView.Adapter<PasswordAdapter.ViewHolder>() {
+
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val siteNameView: TextView = itemView.findViewById(R.id.siteNamePassword)
         val usernameView: TextView = itemView.findViewById(R.id.usernamePassword)
@@ -30,13 +31,18 @@ class PasswordAdapter(private val passwords: List<Password>) :
         holder.usernameView.text = "Username: " + password.username
         holder.passwordView.text = "Password: " + password.password
         holder.positionView.text = (position + 1).toString()
+
+        holder.itemView.setOnLongClickListener {
+            clickListener(password)
+            true
+        }
     }
 
     override fun getItemCount() = passwords.size
 
 }
 
-class PinAdapter(private val pins: List<Pin>) :
+class PinAdapter(private val pins: List<Pin>, val clickListener: (Pin) -> Unit) :
     RecyclerView.Adapter<PinAdapter.ViewHolder>() {
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val descriptionView: TextView = itemView.findViewById(R.id.descriptionPin)
@@ -58,13 +64,18 @@ class PinAdapter(private val pins: List<Pin>) :
         holder.descriptionView.text = "Description: " + pin.description
         holder.pinView.text = "Pin: " + pin.password
         holder.positionView.text = (position + 1).toString()
+
+        holder.itemView.setOnLongClickListener {
+            clickListener(pin)
+            true
+        }
     }
 
     override fun getItemCount() = pins.size
 
 }
 
-class CCAdapter(private val cards: List<CreditCard>) :
+class CCAdapter(private val cards: List<CreditCard>, val clickListener: (CreditCard) -> Unit) :
     RecyclerView.Adapter<CCAdapter.ViewHolder>() {
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val cardNumberView: TextView = itemView.findViewById(R.id.cardNumberCC)
@@ -86,6 +97,11 @@ class CCAdapter(private val cards: List<CreditCard>) :
         holder.cardNumberView.text = "Description: " + card.number
         holder.securityCodeView.text = "Password: " + card.securityCode
         holder.positionView.text = (position + 1).toString()
+
+        holder.itemView.setOnLongClickListener {
+            clickListener(card)
+            true
+        }
     }
 
     override fun getItemCount() = cards.size

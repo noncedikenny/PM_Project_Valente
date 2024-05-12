@@ -15,13 +15,5 @@
     <fragment
         android:id="@+id/listFragment"
         android:name="it.progmob.passwordmanager.ListFragment"
-        android:label="ListFragment" >
-        <action
-            android:id="@+id/action_listFragment_to_addFragment"
-            app:destination="@id/addFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/addFragment"
-        android:name="it.progmob.passwordmanager.AddFragment"
-        android:label="AddFragment" />
+        android:label="ListFragment" />
 </navigation>

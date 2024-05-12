@@ -1,6 +1,5 @@
 package it.progmob.passwordmanager
 
-import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,10 +10,10 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 import it.progmob.passwordmanager.databinding.ListFragmentBinding
-import kotlin.properties.Delegates
 
 class ListFragment : Fragment() {
 
@@ -31,6 +30,7 @@ class ListFragment : Fragment() {
     ): View? {
         (activity as AppCompatActivity).supportActionBar?.title = "Setup an item"
         binding = ListFragmentBinding.inflate(inflater, container, false)
+
         return binding.root
     }
 
@@ -41,13 +41,27 @@ class ListFragment : Fragment() {
 
         when (viewModel.imageClicked) {
             1 -> viewModel.passwordList.observe(viewLifecycleOwner) { passwordList ->
-                binding.recyclerView.adapter = PasswordAdapter(passwordList)
+                binding.recyclerView.adapter = PasswordAdapter(passwordList) {
+                    val db = Firebase.firestore
+                    db.collection("Passwords").document(it.siteName).delete()
+                    viewModel.removeItem(it)
+                }
             }
+
             2 -> viewModel.pinList.observe(viewLifecycleOwner) { pinList ->
-                binding.recyclerView.adapter = PinAdapter(pinList)
+                binding.recyclerView.adapter = PinAdapter(pinList) {
+                    val db = Firebase.firestore
+                    db.collection("Passwords").document(it.description).delete()
+                    viewModel.removeItem(it)
+                }
             }
+
             3 -> viewModel.ccList.observe(viewLifecycleOwner) { ccList ->
-                binding.recyclerView.adapter = CCAdapter(ccList)
+                binding.recyclerView.adapter = CCAdapter(ccList) {
+                    val db = Firebase.firestore
+                    db.collection("Passwords").document(it.number).delete()
+                    viewModel.removeItem(it)
+                }
             }
         }
 
@@ -89,33 +103,25 @@ class ListFragment : Fragment() {
             alertDialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setOnClickListener {
                 // Bind input
                 var somethingIsEmpty = false
-                viewInflated.findViewById<EditText>(R.id.siteNameInput)?.let {
-                    if (it.text.toString().isEmpty()) {
-                        somethingIsEmpty = true
-                    }
-                }
-                viewInflated.findViewById<EditText>(R.id.usernameInput)?.let {
-                    if (it.text.toString().isEmpty()) {
-                        somethingIsEmpty = true
-                    }
-                }
-                viewInflated.findViewById<EditText>(R.id.passwordInput)?.let {
-                    if (it.text.toString().isEmpty()) {
-                        somethingIsEmpty = true
-                    }
-                }
 
                 if (somethingIsEmpty) {
                     Toast.makeText(requireContext(), "Every field must be filled.", Toast.LENGTH_SHORT).show()
                 } else {
+                    val db = Firebase.firestore
+
                     if(viewModel.imageClicked == 1) {
                         val newItem = Password(
                             viewInflated.findViewById<EditText>(R.id.siteNameInput).text.toString(),
                             viewInflated.findViewById<EditText>(R.id.usernameInput).text.toString(),
                             viewInflated.findViewById<EditText>(R.id.passwordInput).text.toString())
                         viewModel.addItem(newItem)
+                        db.collection("Passwords").document(newItem.siteName).set(newItem)
+
                         viewModel.passwordList.observe(viewLifecycleOwner) { passwordList ->
-                            binding.recyclerView.adapter = PasswordAdapter(passwordList)
+                            binding.recyclerView.adapter = PasswordAdapter(passwordList) {
+                                db.collection("Passwords").document(it.siteName).delete()
+                                viewModel.removeItem(it)
+                            }
                         }
                     }
                     else if(viewModel.imageClicked == 2) {
@@ -123,8 +129,12 @@ class ListFragment : Fragment() {
                             viewInflated.findViewById<EditText>(R.id.pinDescriptionInput).text.toString(),
                             viewInflated.findViewById<EditText>(R.id.pinInput).text.toString())
                         viewModel.addItem(newItem)
+                        db.collection("Pins").document(newItem.description).set(newItem)
                         viewModel.pinList.observe(viewLifecycleOwner) { pinList ->
-                            binding.recyclerView.adapter = PinAdapter(pinList)
+                            binding.recyclerView.adapter = PinAdapter(pinList) {
+                                db.collection("Passwords").document(it.description).delete()
+                                viewModel.removeItem(it)
+                            }
                         }
                     }
                     else if(viewModel.imageClicked == 3) {
@@ -132,8 +142,12 @@ class ListFragment : Fragment() {
                             viewInflated.findViewById<EditText>(R.id.cardNumberInput).text.toString(),
                             viewInflated.findViewById<EditText>(R.id.cardSafetyCodeInput).text.toString())
                         viewModel.addItem(newItem)
+                        db.collection("CreditCards").document(newItem.number).set(newItem)
                         viewModel.ccList.observe(viewLifecycleOwner) { ccList ->
-                            binding.recyclerView.adapter = CCAdapter(ccList)
+                            binding.recyclerView.adapter = CCAdapter(ccList) {
+                                db.collection("Passwords").document(it.number).delete()
+                                viewModel.removeItem(it)
+                            }
                         }
                     }
 
@@ -151,7 +165,6 @@ class ListFragment : Fragment() {
             }
         }
     }
-
 }
 
 fun generateRandom(length: Int): String {

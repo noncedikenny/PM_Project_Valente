@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     id("kotlin-kapt")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -58,4 +59,8 @@ dependencies {
     val activity_version = "1.8.2"
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version")
     implementation("androidx.activity:activity-ktx:$activity_version")
+    implementation(platform("com.google.firebase:firebase-bom:33.0.0"))
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.code.gson:gson:2.8.8")
+    implementation("com.google.guava:guava:30.1-android")
 }

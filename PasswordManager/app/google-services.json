@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "816322261911",
+    "project_id": "password-8941d",
+    "storage_bucket": "password-8941d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:816322261911:android:bdbafb237ee5a638374ad2",
+        "android_client_info": {
+          "package_name": "it.progmob.passwordmanager"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdWrXw0_4lrEctWwNzo6-uCpM6tqx_ReE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

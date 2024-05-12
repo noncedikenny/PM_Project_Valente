@@ -4,12 +4,12 @@ import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.viewModels
+import com.google.firebase.Firebase
 import it.progmob.passwordmanager.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
-    val viewModel: ManagerViewModel by viewModels()
+    private val viewModel: ManagerViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding: ActivityMainBinding = ActivityMainBinding.inflate(layoutInflater)
@@ -18,5 +18,6 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.myToolbar)
 
         binding.lifecycleOwner = this
+        viewModel.fetchDataFromDatabase()
     }
 }

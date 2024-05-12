@@ -3,6 +3,8 @@ package it.progmob.passwordmanager
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
 
 class ManagerViewModel : ViewModel() {
     private val _passwordList = MutableLiveData<MutableList<Password>>()
@@ -74,5 +76,79 @@ class ManagerViewModel : ViewModel() {
 
         // Update the LiveData with the modified list
         _ccList.value = ccList
+    }
+
+    fun removeItem(password: Password) {
+        val passwordList = _passwordList.value ?: mutableListOf()
+
+        // Check if the subject with the same name already exists
+        val passwordToDelete = passwordList.find { it.siteName == password.siteName }
+
+        passwordList.remove(passwordToDelete)
+
+        // Update the LiveData with the modified list
+        _passwordList.value = passwordList
+    }
+
+    fun removeItem(pin: Pin) {
+        val pinList = _pinList.value ?: mutableListOf()
+
+        // Check if the subject with the same name already exists
+        val pinToDelete = pinList.find { it.description == pin.description }
+
+        pinList.remove(pinToDelete)
+
+        // Update the LiveData with the modified list
+        _pinList.value = pinList
+    }
+
+    fun removeItem(cc: CreditCard) {
+        val ccList = _ccList.value ?: mutableListOf()
+
+        // Check if the subject with the same name already exists
+        val ccToDelete = ccList.find { it.number == cc.number }
+
+        ccList.remove(ccToDelete)
+
+        // Update the LiveData with the modified list
+        _ccList.value = ccList
+    }
+
+    fun fetchDataFromDatabase() {
+        val db = Firebase.firestore
+
+        db.collection("Passwords")
+            .get()
+            .addOnSuccessListener { result ->
+                val passwordList = _passwordList.value ?: mutableListOf()
+                for (document in result) {
+                    val password = document.toObject(Password::class.java)
+                    password.let { passwordList.add(it) }
+                }
+                _passwordList.value = passwordList
+            }
+
+        db.collection("Pins")
+            .get()
+            .addOnSuccessListener { result ->
+                val pinList = _pinList.value ?: mutableListOf()
+                for (document in result) {
+                    val pin = document.toObject(Pin::class.java)
+                    pin.let { pinList.add(it) }
+                }
+                _pinList.value = pinList
+            }
+
+        db.collection("CreditCards")
+            .get()
+            .addOnSuccessListener { result ->
+                val ccList = _ccList.value ?: mutableListOf()
+                for (document in result) {
+                    val cc = document.toObject(CreditCard::class.java)
+                    cc.let { ccList.add(it) }
+                }
+                _ccList.value = ccList
+            }
+
     }
 }

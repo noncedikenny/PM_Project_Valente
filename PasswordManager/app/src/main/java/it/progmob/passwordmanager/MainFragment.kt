@@ -9,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.Navigation
-import androidx.recyclerview.widget.LinearLayoutManager
 import it.progmob.passwordmanager.databinding.MainFragmentBinding
 
 class MainFragment : Fragment() {
