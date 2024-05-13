@@ -13,28 +13,13 @@
         android:text="A ProgMob Project"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/my_toolbar"
-        app:layout_constraintVertical_bias="0.89" />
-
-    <ImageView
-        android:id="@+id/settingsImageView"
-        android:layout_width="125dp"
-        android:layout_height="125dp"
-        android:layout_marginTop="16dp"
-        android:contentDescription="SettingsView"
-        app:layout_constraintEnd_toEndOf="@+id/ccImageView"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/ccImageView"
-        app:layout_constraintTop_toBottomOf="@+id/ccImageView"
-        app:srcCompat="@drawable/settings_icon" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <ImageView
         android:id="@+id/pinImageView"
         android:layout_width="125dp"
         android:layout_height="125dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="32dp"
         android:contentDescription="PinView"
         app:layout_constraintEnd_toEndOf="@+id/passwordImageView"
         app:layout_constraintHorizontal_bias="0.0"
@@ -46,10 +31,9 @@
         android:id="@+id/ccImageView"
         android:layout_width="125dp"
         android:layout_height="125dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="32dp"
         android:contentDescription="CreditCardView"
         app:layout_constraintEnd_toEndOf="@+id/pinImageView"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/pinImageView"
         app:layout_constraintTop_toBottomOf="@+id/pinImageView"
         app:srcCompat="@drawable/credit_card_icon" />
@@ -58,10 +42,10 @@
         android:id="@+id/passwordView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="92dp"
+        android:layout_marginEnd="64dp"
         android:text="Password"
         android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="@+id/passwordImageView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/passwordImageView" />
 
@@ -69,8 +53,8 @@
         android:id="@+id/passwordImageView"
         android:layout_width="125dp"
         android:layout_height="125dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="60dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="84dp"
         android:contentDescription="PasswordView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -80,7 +64,6 @@
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
         android:text="Add here your passwords."
         app:layout_constraintEnd_toEndOf="@+id/passwordView"
         app:layout_constraintStart_toStartOf="@+id/passwordView"
@@ -90,18 +73,17 @@
         android:id="@+id/pinView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="85dp"
         android:text="Pin"
         android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="@+id/textView2"
-        app:layout_constraintStart_toStartOf="@+id/textView2"
-        app:layout_constraintTop_toBottomOf="@+id/textView2" />
+        app:layout_constraintBottom_toBottomOf="@+id/pinImageView"
+        app:layout_constraintEnd_toEndOf="@+id/passwordView"
+        app:layout_constraintStart_toStartOf="@+id/passwordView"
+        app:layout_constraintTop_toTopOf="@+id/pinImageView" />
 
     <TextView
         android:id="@+id/subPinView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
         android:text="Add here your pins."
         app:layout_constraintEnd_toEndOf="@+id/pinView"
         app:layout_constraintStart_toStartOf="@+id/pinView"
@@ -111,33 +93,20 @@
         android:id="@+id/ccVIew"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="85dp"
         android:text="Credit Card"
         android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="@+id/subPinView"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/subPinView"
-        app:layout_constraintTop_toBottomOf="@+id/subPinView" />
+        app:layout_constraintBottom_toBottomOf="@+id/ccImageView"
+        app:layout_constraintEnd_toEndOf="@+id/pinView"
+        app:layout_constraintStart_toStartOf="@+id/pinView"
+        app:layout_constraintTop_toTopOf="@+id/ccImageView" />
 
     <TextView
         android:id="@+id/subCCView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
         android:text="Add here your credit cards."
         app:layout_constraintEnd_toEndOf="@+id/ccVIew"
         app:layout_constraintStart_toStartOf="@+id/ccVIew"
         app:layout_constraintTop_toBottomOf="@+id/ccVIew" />
-
-    <TextView
-        android:id="@+id/settingsView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="96dp"
-        android:text="Settings"
-        android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="@+id/subCCView"
-        app:layout_constraintStart_toStartOf="@+id/subCCView"
-        app:layout_constraintTop_toBottomOf="@+id/subCCView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

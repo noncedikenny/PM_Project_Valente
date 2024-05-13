@@ -19,6 +19,7 @@ class ManagerViewModel : ViewModel() {
         get() = _ccList
 
     var imageClicked: Int = 0
+    var userEmail: String? = null
 
     fun addItem(password: Password) {
         val passwordList = _passwordList.value ?: mutableListOf()
@@ -126,39 +127,36 @@ class ManagerViewModel : ViewModel() {
 
     fun fetchDataFromDatabase() {
         val db = Firebase.firestore
+        val userRef = userEmail?.let { db.collection("users").document(it) }
+        val passwordsRef = userRef?.collection("Passwords")
+        val pinsRef = userRef?.collection("Pins")
+        val ccRef = userRef?.collection("CreditCards")
 
-        db.collection("Passwords")
-            .get()
-            .addOnSuccessListener { result ->
-                val passwordList = _passwordList.value ?: mutableListOf()
-                for (document in result) {
-                    val password = document.toObject(Password::class.java)
-                    password.let { passwordList.add(it) }
-                }
-                _passwordList.value = passwordList
+        passwordsRef?.get()?.addOnSuccessListener { result ->
+            val passwordList = _passwordList.value ?: mutableListOf()
+            for (document in result) {
+                val password = document.toObject(Password::class.java)
+                password.let { passwordList.add(it) }
             }
+            _passwordList.value = passwordList
+        }
 
-        db.collection("Pins")
-            .get()
-            .addOnSuccessListener { result ->
-                val pinList = _pinList.value ?: mutableListOf()
-                for (document in result) {
-                    val pin = document.toObject(Pin::class.java)
-                    pin.let { pinList.add(it) }
-                }
-                _pinList.value = pinList
+        pinsRef?.get()?.addOnSuccessListener { result ->
+            val pinList = _pinList.value ?: mutableListOf()
+            for (document in result) {
+                val pin = document.toObject(Pin::class.java)
+                pin.let { pinList.add(it) }
             }
+            _pinList.value = pinList
+        }
 
-        db.collection("CreditCards")
-            .get()
-            .addOnSuccessListener { result ->
-                val ccList = _ccList.value ?: mutableListOf()
-                for (document in result) {
-                    val cc = document.toObject(CreditCard::class.java)
-                    cc.let { ccList.add(it) }
-                }
-                _ccList.value = ccList
+        ccRef?.get()?.addOnSuccessListener { result ->
+            val ccList = _ccList.value ?: mutableListOf()
+            for (document in result) {
+                val cc = document.toObject(CreditCard::class.java)
+                cc.let { ccList.add(it) }
             }
-
+            _ccList.value = ccList
+        }
     }
 }

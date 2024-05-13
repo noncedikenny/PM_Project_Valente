@@ -18,22 +18,13 @@
         app:layout_constraintVertical_bias="0.409" />
 
     <Button
-        android:id="@+id/importButton"
+        android:id="@+id/logoutButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Import from file"
+        android:text="Logout"
         app:layout_constraintEnd_toEndOf="@+id/resetButton"
         app:layout_constraintStart_toStartOf="@+id/resetButton"
         app:layout_constraintTop_toBottomOf="@+id/resetButton" />
 
-    <Button
-        android:id="@+id/exportButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Export to file"
-        app:layout_constraintEnd_toEndOf="@+id/importButton"
-        app:layout_constraintStart_toStartOf="@+id/importButton"
-        app:layout_constraintTop_toBottomOf="@+id/importButton" />
 </androidx.constraintlayout.widget.ConstraintLayout>

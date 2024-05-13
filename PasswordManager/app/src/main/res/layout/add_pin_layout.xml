@@ -9,7 +9,7 @@
         android:id="@+id/pinDescriptionInput"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
-        android:layout_marginTop="64dp"
+        android:layout_marginTop="16dp"
         android:ems="10"
         android:hint="Description"
         android:inputType="text"

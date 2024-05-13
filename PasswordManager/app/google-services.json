@@ -12,7 +12,20 @@
           "package_name": "it.progmob.passwordmanager"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "816322261911-pbitlergnngb4k4e5s444pch40e2lhat.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "it.progmob.passwordmanager",
+            "certificate_hash": "24d1a5a73c20562cc57d1b9c7d41f02b4a3daf2e"
+          }
+        },
+        {
+          "client_id": "816322261911-9uomqn28r6ct1fvvnak2iukv0fef02jg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDdWrXw0_4lrEctWwNzo6-uCpM6tqx_ReE"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "816322261911-9uomqn28r6ct1fvvnak2iukv0fef02jg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

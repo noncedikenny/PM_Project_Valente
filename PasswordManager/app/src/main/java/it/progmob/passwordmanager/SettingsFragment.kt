@@ -1,12 +1,15 @@
 package it.progmob.passwordmanager
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import com.firebase.ui.auth.AuthUI
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import it.progmob.passwordmanager.databinding.SettingsFragmentBinding
@@ -54,6 +57,16 @@ class SettingsFragment : Fragment() {
                 };
 
             viewModel.reset()
+        }
+
+        binding.logoutButton.setOnClickListener {
+            AuthUI.getInstance()
+                .signOut(requireContext())
+                .addOnCompleteListener {
+                    Toast.makeText(requireContext(), "Logged out.", Toast.LENGTH_SHORT).show()
+                    val intent = Intent(requireContext(), WelcomeActivity::class.java)
+                    startActivity(intent)
+                }
         }
     }
 }
