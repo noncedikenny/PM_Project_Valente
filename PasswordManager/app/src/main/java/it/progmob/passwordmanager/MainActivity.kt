@@ -26,12 +26,12 @@ class MainActivity : AppCompatActivity() {
 
         val user = FirebaseAuth.getInstance().currentUser
         user?.let {
-            viewModel.userEmail = user.email
+            viewModel.userID = user.uid
         }
 
         viewModel.fetchDataFromDatabase()
 
-        val userEmail: String? = viewModel.userEmail
+        val userEmail: String? = viewModel.userID
         Toast.makeText(this, userEmail, Toast.LENGTH_SHORT).show()
     }
 

@@ -19,7 +19,7 @@ class ManagerViewModel : ViewModel() {
         get() = _ccList
 
     var imageClicked: Int = 0
-    var userEmail: String? = null
+    var userID: String? = null
 
     fun addItem(password: Password) {
         val passwordList = _passwordList.value ?: mutableListOf()
@@ -127,7 +127,7 @@ class ManagerViewModel : ViewModel() {
 
     fun fetchDataFromDatabase() {
         val db = Firebase.firestore
-        val userRef = userEmail?.let { db.collection("users").document(it) }
+        val userRef = userID?.let { db.collection("users").document(it) }
         val passwordsRef = userRef?.collection("Passwords")
         val pinsRef = userRef?.collection("Pins")
         val ccRef = userRef?.collection("CreditCards")

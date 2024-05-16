@@ -43,7 +43,7 @@ class ListFragment : Fragment() {
             1 -> viewModel.passwordList.observe(viewLifecycleOwner) { passwordList ->
                 binding.recyclerView.adapter = PasswordAdapter(passwordList) {
                     val db = Firebase.firestore
-                    val userRef = viewModel.userEmail?.let { it1 -> db.collection("users").document(it1) }
+                    val userRef = viewModel.userID?.let { it1 -> db.collection("users").document(it1) }
                     userRef?.collection("Passwords")?.document(it.siteName)?.delete()
                     viewModel.removeItem(it)
                 }
@@ -52,7 +52,7 @@ class ListFragment : Fragment() {
             2 -> viewModel.pinList.observe(viewLifecycleOwner) { pinList ->
                 binding.recyclerView.adapter = PinAdapter(pinList) {
                     val db = Firebase.firestore
-                    val userRef = viewModel.userEmail?.let { it1 -> db.collection("users").document(it1) }
+                    val userRef = viewModel.userID?.let { it1 -> db.collection("users").document(it1) }
                     userRef?.collection("Pins")?.document(it.description)?.delete()
                     viewModel.removeItem(it)
                 }
@@ -61,7 +61,7 @@ class ListFragment : Fragment() {
             3 -> viewModel.ccList.observe(viewLifecycleOwner) { ccList ->
                 binding.recyclerView.adapter = CCAdapter(ccList) {
                     val db = Firebase.firestore
-                    val userRef = viewModel.userEmail?.let { it1 -> db.collection("users").document(it1) }
+                    val userRef = viewModel.userID?.let { it1 -> db.collection("users").document(it1) }
                     userRef?.collection("CreditCards")?.document(it.number)?.delete()
                     viewModel.removeItem(it)
                 }
@@ -118,7 +118,7 @@ class ListFragment : Fragment() {
                             viewInflated.findViewById<EditText>(R.id.usernameInput).text.toString(),
                             viewInflated.findViewById<EditText>(R.id.passwordInput).text.toString())
                         viewModel.addItem(newItem)
-                        val userRef = viewModel.userEmail?.let { it1 -> db.collection("users").document(it1) }
+                        val userRef = viewModel.userID?.let { it1 -> db.collection("users").document(it1) }
                         userRef?.collection("Passwords")?.document(newItem.siteName)?.set(newItem)
 
                         viewModel.passwordList.observe(viewLifecycleOwner) { passwordList ->
@@ -133,7 +133,7 @@ class ListFragment : Fragment() {
                             viewInflated.findViewById<EditText>(R.id.pinDescriptionInput).text.toString(),
                             viewInflated.findViewById<EditText>(R.id.pinInput).text.toString())
                         viewModel.addItem(newItem)
-                        val userRef = viewModel.userEmail?.let { it1 -> db.collection("users").document(it1) }
+                        val userRef = viewModel.userID?.let { it1 -> db.collection("users").document(it1) }
                         userRef?.collection("Pins")?.document(newItem.description)?.set(newItem)
                         viewModel.pinList.observe(viewLifecycleOwner) { pinList ->
                             binding.recyclerView.adapter = PinAdapter(pinList) {
@@ -147,7 +147,7 @@ class ListFragment : Fragment() {
                             viewInflated.findViewById<EditText>(R.id.cardNumberInput).text.toString(),
                             viewInflated.findViewById<EditText>(R.id.cardSafetyCodeInput).text.toString())
                         viewModel.addItem(newItem)
-                        val userRef = viewModel.userEmail?.let { it1 -> db.collection("users").document(it1) }
+                        val userRef = viewModel.userID?.let { it1 -> db.collection("users").document(it1) }
                         userRef?.collection("CreditCards")?.document(newItem.number)?.set(newItem)
                         viewModel.ccList.observe(viewLifecycleOwner) { ccList ->
                             binding.recyclerView.adapter = CCAdapter(ccList) {
