@@ -10,6 +10,7 @@ class ManagerViewModel : ViewModel() {
     private val _passwordList = MutableLiveData<MutableList<Password>>()
     private val _pinList = MutableLiveData<MutableList<Pin>>()
     private val _ccList = MutableLiveData<MutableList<CreditCard>>()
+    private val _usersList = MutableLiveData<MutableList<User>>()
 
     val passwordList: LiveData<MutableList<Password>>
         get() = _passwordList
@@ -17,6 +18,8 @@ class ManagerViewModel : ViewModel() {
         get() = _pinList
     val ccList: LiveData<MutableList<CreditCard>>
         get() = _ccList
+    val usersList: LiveData<MutableList<User>>
+        get() = _usersList
 
     var imageClicked: Int = 0
     var userID: String? = null
@@ -125,14 +128,14 @@ class ManagerViewModel : ViewModel() {
         _ccList.value = ccList
     }
 
-    fun fetchDataFromDatabase() {
+    fun fetchDataFromDatabase(userId: String) {
         val db = Firebase.firestore
-        val userRef = userID?.let { db.collection("users").document(it) }
-        val passwordsRef = userRef?.collection("Passwords")
-        val pinsRef = userRef?.collection("Pins")
-        val ccRef = userRef?.collection("CreditCards")
+        val userRef = db.collection("users").document(userId)
+        val passwordsRef = userRef.collection("Passwords")
+        val pinsRef = userRef.collection("Pins")
+        val ccRef = userRef.collection("CreditCards")
 
-        passwordsRef?.get()?.addOnSuccessListener { result ->
+        passwordsRef.get().addOnSuccessListener { result ->
             val passwordList = _passwordList.value ?: mutableListOf()
             for (document in result) {
                 val password = document.toObject(Password::class.java)
@@ -141,7 +144,7 @@ class ManagerViewModel : ViewModel() {
             _passwordList.value = passwordList
         }
 
-        pinsRef?.get()?.addOnSuccessListener { result ->
+        pinsRef.get().addOnSuccessListener { result ->
             val pinList = _pinList.value ?: mutableListOf()
             for (document in result) {
                 val pin = document.toObject(Pin::class.java)
@@ -150,13 +153,27 @@ class ManagerViewModel : ViewModel() {
             _pinList.value = pinList
         }
 
-        ccRef?.get()?.addOnSuccessListener { result ->
+        ccRef.get().addOnSuccessListener { result ->
             val ccList = _ccList.value ?: mutableListOf()
             for (document in result) {
                 val cc = document.toObject(CreditCard::class.java)
                 cc.let { ccList.add(it) }
             }
             _ccList.value = ccList
+        }
+    }
+
+    fun fetchUsersFromDatabase(userId: String) {
+        val db = Firebase.firestore
+        val userRef = db.collection("users").document(userId).collection("associated_users")
+
+        userRef.get().addOnSuccessListener { result ->
+            val usersList = _usersList.value ?: mutableListOf()
+            for (document in result) {
+                val user = document.toObject(User::class.java)
+                user.let { usersList.add(it) }
+            }
+            _usersList.value = usersList
         }
     }
 }

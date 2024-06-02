@@ -107,3 +107,33 @@ class CCAdapter(private val cards: List<CreditCard>, val clickListener: (CreditC
     override fun getItemCount() = cards.size
 
 }
+
+class UserAdapter(private val users: List<User>, val clickListener: (User) -> Unit) :
+    RecyclerView.Adapter<UserAdapter.ViewHolder>() {
+    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val emailUserView: TextView = itemView.findViewById(R.id.emailUser)
+        val positionView: TextView = itemView.findViewById(R.id.numberUser)
+    }
+
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int
+    ): UserAdapter.ViewHolder {
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.user_item_layout, parent, false)
+        return ViewHolder(view)
+    }
+
+    override fun onBindViewHolder(holder: UserAdapter.ViewHolder, position: Int) {
+        val user = users[position]
+        holder.emailUserView.text = user.email
+        holder.positionView.text = (position + 1).toString()
+
+        holder.itemView.setOnClickListener {
+            clickListener(user)
+        }
+    }
+
+    override fun getItemCount() = users.size
+
+}

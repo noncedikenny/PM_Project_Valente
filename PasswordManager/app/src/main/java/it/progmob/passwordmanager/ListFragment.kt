@@ -27,10 +27,9 @@ class ListFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         (activity as AppCompatActivity).supportActionBar?.title = "Setup an item"
         binding = ListFragmentBinding.inflate(inflater, container, false)
-
         return binding.root
     }
 

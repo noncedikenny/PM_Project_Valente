@@ -23,16 +23,6 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.myToolbar)
 
         binding.lifecycleOwner = this
-
-        val user = FirebaseAuth.getInstance().currentUser
-        user?.let {
-            viewModel.userID = user.uid
-        }
-
-        viewModel.fetchDataFromDatabase()
-
-        val userEmail: String? = viewModel.userID
-        Toast.makeText(this, userEmail, Toast.LENGTH_SHORT).show()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

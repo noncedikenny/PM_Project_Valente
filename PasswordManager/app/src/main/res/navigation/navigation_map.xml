@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/navigation_map"
-    app:startDestination="@id/mainFragment">
+    app:startDestination="@id/usersFragment">
 
     <fragment
         android:id="@+id/mainFragment"
@@ -24,4 +24,13 @@
         android:id="@+id/settingsFragment"
         android:name="it.progmob.passwordmanager.SettingsFragment"
         android:label="SettingsFragment" />
+    <fragment
+        android:id="@+id/usersFragment"
+        android:name="it.progmob.passwordmanager.UsersFragment"
+        android:label="users_fragment"
+        tools:layout="@layout/users_fragment" >
+        <action
+            android:id="@+id/action_usersFragment_to_mainFragment"
+            app:destination="@id/mainFragment" />
+    </fragment>
 </navigation>

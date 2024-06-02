@@ -9,3 +9,6 @@ data class Pin(var description: String, var password: String) {
 data class CreditCard(var number: String, var securityCode: String) {
     constructor() : this("", "")
 }
+data class User(var id: String, var email: String) {
+    constructor() : this("", "")
+}
