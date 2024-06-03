@@ -3,13 +3,12 @@ package it.progmob.passwordmanager
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.onNavDestinationSelected
-import com.google.firebase.auth.FirebaseAuth
 import it.progmob.passwordmanager.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {

@@ -7,9 +7,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
@@ -169,6 +171,12 @@ class ListFragment : Fragment() {
                 }
             }
         }
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                Navigation.findNavController(view).navigate(R.id.action_listFragment_to_mainFragment)
+            }
+        })
     }
 }
 

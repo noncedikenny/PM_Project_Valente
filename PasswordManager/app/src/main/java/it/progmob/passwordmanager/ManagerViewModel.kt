@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
 
 class ManagerViewModel : ViewModel() {
@@ -122,10 +123,14 @@ class ManagerViewModel : ViewModel() {
         val passwordList: ArrayList<Password> = ArrayList()
         val pinList: ArrayList<Pin> = ArrayList()
         val ccList: ArrayList<CreditCard> = ArrayList()
+        val usersList: ArrayList<User> = ArrayList()
 
         _passwordList.value = passwordList
         _pinList.value = pinList
         _ccList.value = ccList
+        _usersList.value = usersList
+        imageClicked = 0
+        userID = ""
     }
 
     fun fetchDataFromDatabase(userId: String) {
@@ -169,6 +174,13 @@ class ManagerViewModel : ViewModel() {
 
         userRef.get().addOnSuccessListener { result ->
             val usersList = _usersList.value ?: mutableListOf()
+            val currentUser = FirebaseAuth.getInstance().currentUser
+            val self = currentUser?.let { User(it.uid, currentUser.email.toString()) }
+
+            if (self != null) {
+                usersList.add(self)
+            }
+
             for (document in result) {
                 val user = document.toObject(User::class.java)
                 user.let { usersList.add(it) }

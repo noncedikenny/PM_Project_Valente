@@ -12,7 +12,6 @@ import com.google.firebase.auth.FirebaseAuth
 
 class WelcomeActivity : AppCompatActivity() {
 
-    private val viewModel: ManagerViewModel by viewModels()
     private val signInLauncher = registerForActivityResult(
         FirebaseAuthUIActivityResultContract(),
     ) { res ->

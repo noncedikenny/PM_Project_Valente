@@ -23,6 +23,9 @@ class UsersFragment : Fragment() {
     ): View {
         (activity as AppCompatActivity).supportActionBar?.title = "Main menu"
         binding = UsersFragmentBinding.inflate(inflater, container, false)
+
+        viewModel.reset()
+
         return binding.root
     }
 
@@ -41,8 +44,8 @@ class UsersFragment : Fragment() {
             binding.usersRV.adapter = UserAdapter(usersList) { selectedUserId ->
                 viewModel.userID = selectedUserId.id
                 Toast.makeText(requireContext(), selectedUserId.id, Toast.LENGTH_SHORT).show()
-                //viewModel.fetchDataFromDatabase(selectedUserId.id)
-                //Navigation.findNavController(view).navigate(R.id.action_usersFragment_to_mainFragment)
+                viewModel.fetchDataFromDatabase(selectedUserId.id)
+                Navigation.findNavController(view).navigate(R.id.action_usersFragment_to_mainFragment)
             }
         }
     }

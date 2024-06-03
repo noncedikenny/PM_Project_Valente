@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -48,5 +49,15 @@ class MainFragment : Fragment() {
             Navigation.findNavController(view).navigate(R.id.action_mainFragment_to_listFragment)
             viewModel.imageClicked = 3
         }
+
+        binding.backButton.setOnClickListener {
+            Navigation.findNavController(view).navigate(R.id.action_mainFragment_to_usersFragment)
+        }
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                Navigation.findNavController(view).navigate(R.id.action_mainFragment_to_usersFragment)
+            }
+        })
     }
 }

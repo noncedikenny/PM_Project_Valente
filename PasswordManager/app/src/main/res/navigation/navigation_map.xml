@@ -15,15 +15,29 @@
         <action
             android:id="@+id/action_mainFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_usersFragment"
+            app:destination="@id/usersFragment" />
     </fragment>
     <fragment
         android:id="@+id/listFragment"
         android:name="it.progmob.passwordmanager.ListFragment"
-        android:label="ListFragment" />
+        android:label="ListFragment" >
+        <action
+            android:id="@+id/action_listFragment_to_mainFragment"
+            app:destination="@id/mainFragment" />
+    </fragment>
     <fragment
         android:id="@+id/settingsFragment"
         android:name="it.progmob.passwordmanager.SettingsFragment"
-        android:label="SettingsFragment" />
+        android:label="SettingsFragment" >
+        <action
+            android:id="@+id/action_settingsFragment_to_mainFragment"
+            app:destination="@id/mainFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_usersFragment"
+            app:destination="@id/usersFragment" />
+    </fragment>
     <fragment
         android:id="@+id/usersFragment"
         android:name="it.progmob.passwordmanager.UsersFragment"
