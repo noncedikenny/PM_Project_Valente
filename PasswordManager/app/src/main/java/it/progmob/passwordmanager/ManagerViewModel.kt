@@ -130,7 +130,6 @@ class ManagerViewModel : ViewModel() {
         _ccList.value = ccList
         _usersList.value = usersList
         imageClicked = 0
-        userID = ""
     }
 
     fun fetchDataFromDatabase(userId: String) {

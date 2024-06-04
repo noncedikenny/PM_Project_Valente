@@ -1,6 +1,7 @@
 package it.progmob.passwordmanager
 
 import android.app.AlertDialog
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -42,29 +43,53 @@ class ListFragment : Fragment() {
 
         when (viewModel.imageClicked) {
             1 -> viewModel.passwordList.observe(viewLifecycleOwner) { passwordList ->
-                binding.recyclerView.adapter = PasswordAdapter(passwordList) {
-                    val db = Firebase.firestore
-                    val userRef = viewModel.userID?.let { it1 -> db.collection("users").document(it1) }
-                    userRef?.collection("Passwords")?.document(it.siteName)?.delete()
-                    viewModel.removeItem(it)
+                binding.recyclerView.adapter = PasswordAdapter(passwordList,
+                    longClick = {
+                        val db = Firebase.firestore
+                        val userRef = viewModel.userID?.let { it1 -> db.collection("users").document(it1) }
+                        userRef?.collection("Passwords")?.document(it.siteName)?.delete()
+                        viewModel.removeItem(it)
+                    },
+                    onClick = {
+
+                    }
+                )
+                binding.resetAllButton.setOnClickListener {
+                    resetFunction("Passwords")
                 }
             }
 
             2 -> viewModel.pinList.observe(viewLifecycleOwner) { pinList ->
-                binding.recyclerView.adapter = PinAdapter(pinList) {
-                    val db = Firebase.firestore
-                    val userRef = viewModel.userID?.let { it1 -> db.collection("users").document(it1) }
-                    userRef?.collection("Pins")?.document(it.description)?.delete()
-                    viewModel.removeItem(it)
+                binding.recyclerView.adapter = PinAdapter(pinList,
+                    longClick = {
+                        val db = Firebase.firestore
+                        val userRef = viewModel.userID?.let { it1 -> db.collection("users").document(it1) }
+                        userRef?.collection("Pins")?.document(it.description)?.delete()
+                        viewModel.removeItem(it)
+                    },
+                    onClick = {
+
+                    }
+                )
+                binding.resetAllButton.setOnClickListener {
+                    resetFunction("Pins")
                 }
             }
 
             3 -> viewModel.ccList.observe(viewLifecycleOwner) { ccList ->
-                binding.recyclerView.adapter = CCAdapter(ccList) {
-                    val db = Firebase.firestore
-                    val userRef = viewModel.userID?.let { it1 -> db.collection("users").document(it1) }
-                    userRef?.collection("CreditCards")?.document(it.number)?.delete()
-                    viewModel.removeItem(it)
+                binding.recyclerView.adapter = CCAdapter(ccList,
+                    longClick = {
+                        val db = Firebase.firestore
+                        val userRef = viewModel.userID?.let { it1 -> db.collection("users").document(it1) }
+                        userRef?.collection("CreditCards")?.document(it.number)?.delete()
+                        viewModel.removeItem(it)
+                    },
+                    onClick = {
+
+                    }
+                )
+                binding.resetAllButton.setOnClickListener {
+                    resetFunction("CreditCards")
                 }
             }
         }
@@ -123,10 +148,15 @@ class ListFragment : Fragment() {
                         userRef?.collection("Passwords")?.document(newItem.siteName)?.set(newItem)
 
                         viewModel.passwordList.observe(viewLifecycleOwner) { passwordList ->
-                            binding.recyclerView.adapter = PasswordAdapter(passwordList) {
-                                userRef?.collection("Passwords")?.document(it.siteName)?.delete()
-                                viewModel.removeItem(it)
-                            }
+                            binding.recyclerView.adapter = PasswordAdapter(passwordList,
+                                longClick = {
+                                    userRef?.collection("Passwords")?.document(it.siteName)?.delete()
+                                    viewModel.removeItem(it)
+                                },
+                                onClick = {
+
+                                }
+                            )
                         }
                     }
                     else if(viewModel.imageClicked == 2) {
@@ -137,10 +167,15 @@ class ListFragment : Fragment() {
                         val userRef = viewModel.userID?.let { it1 -> db.collection("users").document(it1) }
                         userRef?.collection("Pins")?.document(newItem.description)?.set(newItem)
                         viewModel.pinList.observe(viewLifecycleOwner) { pinList ->
-                            binding.recyclerView.adapter = PinAdapter(pinList) {
-                                userRef?.collection("Pins")?.document(it.description)?.delete()
-                                viewModel.removeItem(it)
-                            }
+                            binding.recyclerView.adapter = PinAdapter(pinList,
+                                longClick = {
+                                    userRef?.collection("Pins")?.document(it.description)?.delete()
+                                    viewModel.removeItem(it)
+                                },
+                                onClick = {
+
+                                }
+                            )
                         }
                     }
                     else if(viewModel.imageClicked == 3) {
@@ -151,10 +186,15 @@ class ListFragment : Fragment() {
                         val userRef = viewModel.userID?.let { it1 -> db.collection("users").document(it1) }
                         userRef?.collection("CreditCards")?.document(newItem.number)?.set(newItem)
                         viewModel.ccList.observe(viewLifecycleOwner) { ccList ->
-                            binding.recyclerView.adapter = CCAdapter(ccList) {
-                                userRef?.collection("CreditCards")?.document(it.number)?.delete()
-                                viewModel.removeItem(it)
-                            }
+                            binding.recyclerView.adapter = CCAdapter(ccList,
+                                longClick = {
+                                    userRef?.collection("CreditCards")?.document(it.number)?.delete()
+                                    viewModel.removeItem(it)
+                                },
+                                onClick = {
+
+                                }
+                            )
                         }
                     }
 
@@ -177,6 +217,42 @@ class ListFragment : Fragment() {
                 Navigation.findNavController(view).navigate(R.id.action_listFragment_to_mainFragment)
             }
         })
+    }
+
+    private fun resetFunction(collectionToDelete: String) {
+        val dialogBuilder = AlertDialog.Builder(requireContext())
+        val viewInflated: View = LayoutInflater.from(requireContext()).inflate(R.layout.confirm_layout, null, false)
+
+        dialogBuilder.setView(viewInflated)
+        dialogBuilder.setTitle("You're going to reset everything, are you sure?")
+        dialogBuilder.setCancelable(false)
+
+        // Buttons
+        dialogBuilder.setPositiveButton("Submit") { _, _ -> }
+        dialogBuilder.setNegativeButton("Cancel") { dialog, _ ->
+            dialog.cancel()
+        }
+
+        val alertDialog = dialogBuilder.create()
+        alertDialog.show()
+        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setOnClickListener {
+            val db = Firebase.firestore
+
+            val userRef = viewModel.userID?.let { it1 -> db.collection("users").document(it1) }
+
+            userRef?.collection(collectionToDelete)?.get()
+                ?.addOnSuccessListener { documents ->
+                    for (document in documents) {
+                        document.reference.delete()
+                    }
+                };
+
+            alertDialog.dismiss()
+
+            viewModel.reset()
+
+            Toast.makeText(requireContext(), "Everything has been deleted correctly.", Toast.LENGTH_LONG).show()
+        }
     }
 }
 

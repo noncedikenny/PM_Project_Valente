@@ -15,6 +15,7 @@ import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
 import it.progmob.passwordmanager.databinding.SettingsFragmentBinding
 
@@ -38,53 +39,11 @@ class SettingsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.resetButton.setOnClickListener {
-            val dialogBuilder = AlertDialog.Builder(requireContext())
-            val viewInflated: View = LayoutInflater.from(requireContext()).inflate(R.layout.confirm_layout, null, false)
+        val currentUser = FirebaseAuth.getInstance().currentUser
 
-            dialogBuilder.setView(viewInflated)
-            dialogBuilder.setTitle("You're going to reset everything, are you sure?")
-            dialogBuilder.setCancelable(false)
+        binding.emailView.text = "You're: " + currentUser!!.email.toString()
 
-            // Buttons
-            dialogBuilder.setPositiveButton("Submit") { _, _ -> }
-            dialogBuilder.setNegativeButton("Cancel") { dialog, _ ->
-                dialog.cancel()
-            }
-
-            val alertDialog = dialogBuilder.create()
-            alertDialog.show()
-            alertDialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setOnClickListener {
-                val db = Firebase.firestore
-
-                val userRef = viewModel.userID?.let { it1 -> db.collection("users").document(it1) }
-
-                userRef?.collection("Passwords")?.get()
-                    ?.addOnSuccessListener { documents ->
-                        for (document in documents) {
-                            document.reference.delete()
-                        }
-                    };
-                userRef?.collection("Pins")?.get()
-                    ?.addOnSuccessListener { documents ->
-                        for (document in documents) {
-                            document.reference.delete()
-                        }
-                    };
-                userRef?.collection("CreditCards")?.get()
-                    ?.addOnSuccessListener { documents ->
-                        for (document in documents) {
-                            document.reference.delete()
-                        }
-                    };
-
-                viewModel.reset()
-
-                alertDialog.dismiss()
-
-                Toast.makeText(requireContext(), "Everything has been deleted correctly.", Toast.LENGTH_LONG).show()
-            }
-        }
+        binding.associatedUsersLenView.text = "Associated users: " + viewModel.usersList.value!!.size
 
         binding.logoutButton.setOnClickListener {
             AuthUI.getInstance()

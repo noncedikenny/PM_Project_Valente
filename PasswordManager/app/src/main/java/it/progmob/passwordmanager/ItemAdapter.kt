@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class PasswordAdapter(private val passwords: List<Password>, val clickListener: (Password) -> Unit) :
+class PasswordAdapter(private val passwords: List<Password>, val longClick: (Password) -> Unit, val onClick: (Password) -> Unit) :
     RecyclerView.Adapter<PasswordAdapter.ViewHolder>() {
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -33,8 +33,11 @@ class PasswordAdapter(private val passwords: List<Password>, val clickListener: 
         holder.positionView.text = (position + 1).toString()
 
         holder.itemView.setOnLongClickListener {
-            clickListener(password)
+            longClick(password)
             true
+        }
+        holder.itemView.setOnClickListener {
+            onClick(password)
         }
     }
 
@@ -42,7 +45,7 @@ class PasswordAdapter(private val passwords: List<Password>, val clickListener: 
 
 }
 
-class PinAdapter(private val pins: List<Pin>, val clickListener: (Pin) -> Unit) :
+class PinAdapter(private val pins: List<Pin>, val longClick: (Pin) -> Unit, val onClick: (Pin) -> Unit) :
     RecyclerView.Adapter<PinAdapter.ViewHolder>() {
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val descriptionView: TextView = itemView.findViewById(R.id.descriptionPin)
@@ -66,8 +69,11 @@ class PinAdapter(private val pins: List<Pin>, val clickListener: (Pin) -> Unit) 
         holder.positionView.text = (position + 1).toString()
 
         holder.itemView.setOnLongClickListener {
-            clickListener(pin)
+            longClick(pin)
             true
+        }
+        holder.itemView.setOnClickListener {
+            onClick(pin)
         }
     }
 
@@ -75,7 +81,7 @@ class PinAdapter(private val pins: List<Pin>, val clickListener: (Pin) -> Unit) 
 
 }
 
-class CCAdapter(private val cards: List<CreditCard>, val clickListener: (CreditCard) -> Unit) :
+class CCAdapter(private val cards: List<CreditCard>, val longClick: (CreditCard) -> Unit, val onClick: (CreditCard) -> Unit) :
     RecyclerView.Adapter<CCAdapter.ViewHolder>() {
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val cardNumberView: TextView = itemView.findViewById(R.id.cardNumberCC)
@@ -99,8 +105,11 @@ class CCAdapter(private val cards: List<CreditCard>, val clickListener: (CreditC
         holder.positionView.text = (position + 1).toString()
 
         holder.itemView.setOnLongClickListener {
-            clickListener(card)
+            longClick(card)
             true
+        }
+        holder.itemView.setOnClickListener {
+            onClick(card)
         }
     }
 
