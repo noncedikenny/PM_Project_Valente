@@ -3,7 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="350dp"
-    android:layout_height="350dp">
+    android:layout_height="500dp">
+
+    <DatePicker
+        android:id="@+id/expirationCreditCardInput"
+        android:layout_width="256dp"
+        android:layout_height="138dp"
+        android:layout_marginTop="16dp"
+        android:calendarViewShown="false"
+        android:datePickerMode="spinner"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@+id/expireCreditCardCheckBox"
+        app:layout_constraintStart_toStartOf="@+id/expireCreditCardCheckBox"
+        app:layout_constraintTop_toBottomOf="@+id/expireCreditCardCheckBox" />
 
     <EditText
         android:id="@+id/cardNumberInput"
@@ -28,4 +40,14 @@
         app:layout_constraintEnd_toEndOf="@+id/cardNumberInput"
         app:layout_constraintStart_toStartOf="@+id/cardNumberInput"
         app:layout_constraintTop_toBottomOf="@+id/cardNumberInput" />
+
+    <CheckBox
+        android:id="@+id/expireCreditCardCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Expires?"
+        app:layout_constraintEnd_toEndOf="@+id/cardSafetyCodeInput"
+        app:layout_constraintStart_toStartOf="@+id/cardSafetyCodeInput"
+        app:layout_constraintTop_toBottomOf="@+id/cardSafetyCodeInput" />
 </androidx.constraintlayout.widget.ConstraintLayout>

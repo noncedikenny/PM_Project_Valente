@@ -1,5 +1,6 @@
 package it.progmob.passwordmanager
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -36,6 +37,7 @@ class ManagerViewModel : ViewModel() {
             existingPassword.siteName = password.siteName
             existingPassword.username = password.username
             existingPassword.password = password.password
+            existingPassword.expirationDate = password.expirationDate
         } else {
             // Add the new subject to the list
             passwordList.add(password)
@@ -49,12 +51,13 @@ class ManagerViewModel : ViewModel() {
         val pinList = _pinList.value ?: mutableListOf()
 
         // Check if the subject with the same name already exists
-        val existingPin = pinList.find { it.password == pin.password }
+        val existingPin = pinList.find { it.description == pin.description }
 
         if (existingPin != null) {
             // Update the existing subject with the new grade and credits
             existingPin.description = pin.description
             existingPin.password = pin.password
+            existingPin.expirationDate = pin.expirationDate
         } else {
             // Add the new subject to the list
             pinList.add(pin)
@@ -74,6 +77,7 @@ class ManagerViewModel : ViewModel() {
             // Update the existing subject with the new grade and credits
             existingCC.number = cc.number
             existingCC.securityCode = cc.securityCode
+            existingCC.expirationDate = cc.expirationDate
         } else {
             // Add the new subject to the list
             ccList.add(cc)
@@ -120,15 +124,10 @@ class ManagerViewModel : ViewModel() {
     }
 
     fun reset() {
-        val passwordList: ArrayList<Password> = ArrayList()
-        val pinList: ArrayList<Pin> = ArrayList()
-        val ccList: ArrayList<CreditCard> = ArrayList()
-        val usersList: ArrayList<User> = ArrayList()
-
-        _passwordList.value = passwordList
-        _pinList.value = pinList
-        _ccList.value = ccList
-        _usersList.value = usersList
+        _passwordList.value = ArrayList()
+        _pinList.value = ArrayList()
+        _ccList.value = ArrayList()
+        _usersList.value = ArrayList()
         imageClicked = 0
     }
 
@@ -139,52 +138,73 @@ class ManagerViewModel : ViewModel() {
         val pinsRef = userRef.collection("Pins")
         val ccRef = userRef.collection("CreditCards")
 
-        passwordsRef.get().addOnSuccessListener { result ->
-            val passwordList = _passwordList.value ?: mutableListOf()
-            for (document in result) {
-                val password = document.toObject(Password::class.java)
-                password.let { passwordList.add(it) }
+        passwordsRef.get()
+            .addOnSuccessListener { result ->
+                val passwordList = _passwordList.value ?: mutableListOf()
+                for (document in result) {
+                    val password = document.toObject(Password::class.java)
+                    password.let { passwordList.add(it) }
+                }
+                _passwordList.value = passwordList
             }
-            _passwordList.value = passwordList
-        }
+            .addOnFailureListener { exception ->
+                Log.w("FirebaseTest", "Error getting documents.", exception)
+            }
 
-        pinsRef.get().addOnSuccessListener { result ->
-            val pinList = _pinList.value ?: mutableListOf()
-            for (document in result) {
-                val pin = document.toObject(Pin::class.java)
-                pin.let { pinList.add(it) }
+        pinsRef.get()
+            .addOnSuccessListener { result ->
+                val pinList = _pinList.value ?: mutableListOf()
+                for (document in result) {
+                    val pin = document.toObject(Pin::class.java)
+                    pin.let { pinList.add(it) }
+                }
+                _pinList.value = pinList
             }
-            _pinList.value = pinList
-        }
+            .addOnFailureListener { exception ->
+                Log.w("FirebaseTest", "Error getting documents.", exception)
+            }
 
-        ccRef.get().addOnSuccessListener { result ->
-            val ccList = _ccList.value ?: mutableListOf()
-            for (document in result) {
-                val cc = document.toObject(CreditCard::class.java)
-                cc.let { ccList.add(it) }
+        ccRef.get()
+            .addOnSuccessListener { result ->
+                val ccList = _ccList.value ?: mutableListOf()
+                for (document in result) {
+                    val cc = document.toObject(CreditCard::class.java)
+                    cc.let { ccList.add(it) }
+                }
+                _ccList.value = ccList
             }
-            _ccList.value = ccList
-        }
+            .addOnFailureListener { exception ->
+                Log.w("FirebaseTest", "Error getting documents.", exception)
+            }
     }
 
     fun fetchUsersFromDatabase(userId: String) {
         val db = Firebase.firestore
         val userRef = db.collection("users").document(userId).collection("associated_users")
 
-        userRef.get().addOnSuccessListener { result ->
-            val usersList = _usersList.value ?: mutableListOf()
-            val currentUser = FirebaseAuth.getInstance().currentUser
-            val self = currentUser?.let { User(it.uid, currentUser.email.toString()) }
+        userRef.get()
+            .addOnSuccessListener { result ->
+                val usersList = _usersList.value ?: mutableListOf()
+                val currentUser = FirebaseAuth.getInstance().currentUser
+                val self = currentUser?.let { User(it.uid, currentUser.email.toString()) }
 
-            if (self != null) {
-                usersList.add(self)
-            }
+                if (self != null) {
+                    usersList.add(self)
+                }
 
-            for (document in result) {
-                val user = document.toObject(User::class.java)
-                user.let { usersList.add(it) }
+                for (document in result) {
+                    val user = document.toObject(User::class.java)
+                    user.let { usersList.add(it) }
+                }
+
+                if (usersList.size == 1) {
+                    userID = currentUser!!.uid
+                }
+
+                _usersList.value = usersList
             }
-            _usersList.value = usersList
-        }
+            .addOnFailureListener { exception ->
+                Log.w("FirebaseTest", "Error getting documents.", exception)
+            }
     }
 }

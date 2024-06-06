@@ -1,11 +1,13 @@
 package it.progmob.passwordmanager
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.Navigation
@@ -24,6 +26,12 @@ class UsersFragment : Fragment() {
         (activity as AppCompatActivity).supportActionBar?.title = "Main menu"
         binding = UsersFragmentBinding.inflate(inflater, container, false)
 
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                // Nothing to do!
+            }
+        })
+
         viewModel.reset()
 
         return binding.root
@@ -38,14 +46,18 @@ class UsersFragment : Fragment() {
 
         if (user != null) {
             viewModel.fetchUsersFromDatabase(user.uid)
-        }
+            viewModel.usersList.observe(viewLifecycleOwner) { usersList ->
+                if (usersList.size == 1) {
+                    viewModel.userID = user.uid
+                    viewModel.fetchDataFromDatabase(user.uid)
+                    Navigation.findNavController(view).navigate(R.id.action_usersFragment_to_mainFragment)
+                }
 
-        viewModel.usersList.observe(viewLifecycleOwner) { usersList ->
-            binding.usersRV.adapter = UserAdapter(usersList) { selectedUserId ->
-                viewModel.userID = selectedUserId.id
-                Toast.makeText(requireContext(), selectedUserId.id, Toast.LENGTH_SHORT).show()
-                viewModel.fetchDataFromDatabase(selectedUserId.id)
-                Navigation.findNavController(view).navigate(R.id.action_usersFragment_to_mainFragment)
+                binding.usersRV.adapter = UserAdapter(usersList) { selectedUserId ->
+                    viewModel.userID = selectedUserId.id
+                    viewModel.fetchDataFromDatabase(selectedUserId.id)
+                    Navigation.findNavController(view).navigate(R.id.action_usersFragment_to_mainFragment)
+                }
             }
         }
     }

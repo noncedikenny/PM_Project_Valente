@@ -7,13 +7,15 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.findNavController
 import androidx.navigation.ui.onNavDestinationSelected
 import it.progmob.passwordmanager.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
-    private val viewModel: ManagerViewModel by viewModels()
+    private val viewModel : ManagerViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val binding: ActivityMainBinding = ActivityMainBinding.inflate(layoutInflater)
@@ -22,6 +24,17 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.myToolbar)
 
         binding.lifecycleOwner = this
+        /*
+        viewModel.usersList.observe(this) { users ->
+            if (users.size == 1) {
+                supportFragmentManager.beginTransaction()
+                    .replace(R.id.nav_host, MainFragment())
+                    .commit()
+            } else if (users.size > 1) {
+                setContentView(binding.root)
+            }
+        }
+        */
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

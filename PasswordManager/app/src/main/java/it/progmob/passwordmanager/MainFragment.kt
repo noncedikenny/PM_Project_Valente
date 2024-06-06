@@ -26,14 +26,23 @@ class MainFragment : Fragment() {
         // Inflate the layout using data binding
         (activity as AppCompatActivity).supportActionBar?.title = "Main menu"
         binding = MainFragmentBinding.inflate(inflater, container, false)
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                viewModel.usersList.observe(viewLifecycleOwner) { users ->
+                    if (users.size > 1) {
+                        // Perform existing functionality
+                        view?.let { Navigation.findNavController(it).navigate(R.id.action_mainFragment_to_usersFragment) }
+                    }
+                }
+            }
+        })
+
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        val userEmail: String? = viewModel.userID
-        Toast.makeText(requireContext(), userEmail, Toast.LENGTH_LONG).show()
 
         binding.passwordImageView.setOnClickListener {
             Navigation.findNavController(view).navigate(R.id.action_mainFragment_to_listFragment)
@@ -53,11 +62,5 @@ class MainFragment : Fragment() {
         binding.backButton.setOnClickListener {
             Navigation.findNavController(view).navigate(R.id.action_mainFragment_to_usersFragment)
         }
-
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                Navigation.findNavController(view).navigate(R.id.action_mainFragment_to_usersFragment)
-            }
-        })
     }
 }

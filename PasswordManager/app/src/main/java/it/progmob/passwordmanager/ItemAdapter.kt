@@ -13,6 +13,7 @@ class PasswordAdapter(private val passwords: List<Password>, val longClick: (Pas
         val siteNameView: TextView = itemView.findViewById(R.id.siteNamePassword)
         val usernameView: TextView = itemView.findViewById(R.id.usernamePassword)
         val passwordView: TextView = itemView.findViewById(R.id.password)
+        val dateView: TextView = itemView.findViewById(R.id.expirationPasswordView)
         val positionView: TextView = itemView.findViewById(R.id.numberPassword)
     }
 
@@ -29,14 +30,23 @@ class PasswordAdapter(private val passwords: List<Password>, val longClick: (Pas
         val password = passwords[position]
         holder.siteNameView.text = "Site Name: " + password.siteName
         holder.usernameView.text = "Username: " + password.username
-        holder.passwordView.text = "Password: " + password.password
+        holder.passwordView.text = "Password: **********"
+        holder.dateView.text = "Expiration Date: " + password.expirationDate
         holder.positionView.text = (position + 1).toString()
+
+        var isPasswordHidden = true
 
         holder.itemView.setOnLongClickListener {
             longClick(password)
             true
         }
         holder.itemView.setOnClickListener {
+            if (isPasswordHidden) {
+                holder.passwordView.text = "Password: " + password.password
+            } else {
+                holder.passwordView.text = "Password: **********"
+            }
+            isPasswordHidden = !isPasswordHidden
             onClick(password)
         }
     }
@@ -50,6 +60,7 @@ class PinAdapter(private val pins: List<Pin>, val longClick: (Pin) -> Unit, val 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val descriptionView: TextView = itemView.findViewById(R.id.descriptionPin)
         val pinView: TextView = itemView.findViewById(R.id.pin)
+        val dateView: TextView = itemView.findViewById(R.id.expirationPinView)
         val positionView: TextView = itemView.findViewById(R.id.numberPin)
     }
 
@@ -65,14 +76,23 @@ class PinAdapter(private val pins: List<Pin>, val longClick: (Pin) -> Unit, val 
     override fun onBindViewHolder(holder: PinAdapter.ViewHolder, position: Int) {
         val pin = pins[position]
         holder.descriptionView.text = "Description: " + pin.description
-        holder.pinView.text = "Pin: " + pin.password
+        holder.pinView.text = "Pin: **********"
+        holder.dateView.text = "Expiration Date: " + pin.expirationDate
         holder.positionView.text = (position + 1).toString()
+
+        var isPinHidden = true
 
         holder.itemView.setOnLongClickListener {
             longClick(pin)
             true
         }
         holder.itemView.setOnClickListener {
+            if (isPinHidden) {
+                holder.pinView.text = "Pin: " + pin.password
+            } else {
+                holder.pinView.text = "Pin: **********"
+            }
+            isPinHidden = !isPinHidden
             onClick(pin)
         }
     }
@@ -86,6 +106,7 @@ class CCAdapter(private val cards: List<CreditCard>, val longClick: (CreditCard)
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val cardNumberView: TextView = itemView.findViewById(R.id.cardNumberCC)
         val securityCodeView: TextView = itemView.findViewById(R.id.securityCodeCC)
+        val dateView: TextView = itemView.findViewById(R.id.expirationCreditCardView)
         val positionView: TextView = itemView.findViewById(R.id.numberCC)
     }
 
@@ -100,15 +121,26 @@ class CCAdapter(private val cards: List<CreditCard>, val longClick: (CreditCard)
 
     override fun onBindViewHolder(holder: CCAdapter.ViewHolder, position: Int) {
         val card = cards[position]
-        holder.cardNumberView.text = "Description: " + card.number
-        holder.securityCodeView.text = "Password: " + card.securityCode
+        holder.cardNumberView.text = "Number: **********"
+        holder.securityCodeView.text = "Security Code: **********"
+        holder.dateView.text = "Expiration Date: " + card.expirationDate
         holder.positionView.text = (position + 1).toString()
+
+        var areFieldsHidden = true
 
         holder.itemView.setOnLongClickListener {
             longClick(card)
             true
         }
         holder.itemView.setOnClickListener {
+            if (areFieldsHidden) {
+                holder.cardNumberView.text = "Number: " + card.number
+                holder.securityCodeView.text = "Security Code: " + card.securityCode
+            } else {
+                holder.cardNumberView.text = "Number: **********"
+                holder.securityCodeView.text = "Security Code: **********"
+            }
+            areFieldsHidden = !areFieldsHidden
             onClick(card)
         }
     }

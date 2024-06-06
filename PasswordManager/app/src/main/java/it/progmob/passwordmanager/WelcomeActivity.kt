@@ -2,13 +2,17 @@ package it.progmob.passwordmanager
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.SetOptions
+import com.google.firebase.firestore.firestore
 
 class WelcomeActivity : AppCompatActivity() {
 
@@ -23,6 +27,17 @@ class WelcomeActivity : AppCompatActivity() {
         if (result.resultCode == RESULT_OK) {
             // Successfully signed in
             val user = FirebaseAuth.getInstance().currentUser
+
+            val db = Firebase.firestore
+            val userRef = db.collection("users").document(user!!.uid)
+
+            userRef.get().addOnSuccessListener { document ->
+                if (!document.exists() || !document.contains("role")) {
+                    val role = hashMapOf("role" to "user")
+                    userRef.set(role)
+                }
+            }
+
             //start the MainActivity
             val intent = Intent(this, MainActivity::class.java)
             intent.putExtra("USER", user)
