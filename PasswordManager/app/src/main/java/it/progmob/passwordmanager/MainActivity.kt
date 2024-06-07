@@ -1,11 +1,15 @@
 package it.progmob.passwordmanager
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.findNavController
@@ -13,8 +17,6 @@ import androidx.navigation.ui.onNavDestinationSelected
 import it.progmob.passwordmanager.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
-
-    private val viewModel : ManagerViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,17 +26,8 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.myToolbar)
 
         binding.lifecycleOwner = this
-        /*
-        viewModel.usersList.observe(this) { users ->
-            if (users.size == 1) {
-                supportFragmentManager.beginTransaction()
-                    .replace(R.id.nav_host, MainFragment())
-                    .commit()
-            } else if (users.size > 1) {
-                setContentView(binding.root)
-            }
-        }
-        */
+
+        createNotificationChannel()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -47,4 +40,21 @@ class MainActivity : AppCompatActivity() {
         return item.onNavDestinationSelected(navController) ||
                 super.onOptionsItemSelected(item)
     }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Create the NotificationChannel.
+            val name = "Notification Channel"
+            val descriptionText = "Channel for notifications"
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val mChannel = NotificationChannel(channelID, name, importance)
+            mChannel.description = descriptionText
+            // Register the channel with the system. You can't change the importance
+            // or other notification behaviors after this.
+            val notificationManager = getSystemService(NOTIFICATION_SERVICE) as
+                    NotificationManager
+            notificationManager.createNotificationChannel(mChannel)
+        }
+    }
+
 }
