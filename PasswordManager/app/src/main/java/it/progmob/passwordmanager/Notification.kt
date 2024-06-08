@@ -8,17 +8,21 @@ import androidx.core.app.NotificationCompat
 
 const val notificationID = 1
 const val channelID = "channel1"
-const val titleExtra = "PasswordManager"
-const val messageExtra = "Your password will expire!"
 
 class Notification : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        // Estrai il titolo e il testo della notifica dagli extra dell'intent
+        val title = intent.getStringExtra("notification_title")
+        val text = intent.getStringExtra("notification_text")
+
+        // Costruisci la notifica utilizzando il titolo e il testo estratti
         val notification = NotificationCompat.Builder(context, channelID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle(intent.getStringExtra(titleExtra))
-            .setContentText(intent.getStringExtra(messageExtra))
+            .setContentTitle(title)
+            .setContentText(text)
             .build()
 
+        // Ottieni il NotificationManager e mostra la notifica
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(notificationID, notification)
     }

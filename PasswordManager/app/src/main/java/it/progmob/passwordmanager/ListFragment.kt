@@ -3,12 +3,9 @@ package it.progmob.passwordmanager
 import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.AlertDialog
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -18,7 +15,6 @@ import android.widget.DatePicker
 import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -168,6 +164,10 @@ class ListFragment : Fragment() {
         binding.addItem.setOnClickListener {
             // Setup builder to build the popup
             val dialogBuilder = AlertDialog.Builder(requireContext())
+
+            val parent = viewInflated.parent as? ViewGroup
+            parent?.removeView(viewInflated)
+
             dialogBuilder.setView(viewInflated)
             dialogBuilder.setTitle("Setup item")
             dialogBuilder.setCancelable(false)
@@ -194,7 +194,9 @@ class ListFragment : Fragment() {
                         "Doesn't expire."
                     }
 
-                    if (expireCheckBox.isChecked) scheduleNotification(datePicker, System.currentTimeMillis().toInt())
+                    val notificationID = System.currentTimeMillis().toInt()
+                    val notificationMap = hashMapOf("notificationID" to notificationID)
+                    if (expireCheckBox.isChecked) scheduleNotification(datePicker, notificationID)
 
                     // Add a password
                     if(viewModel.imageClicked == 1) {
@@ -206,9 +208,11 @@ class ListFragment : Fragment() {
 
                         viewModel.addItem(newItem)
                         userRef?.collection("Passwords")?.document(newItem.siteName)?.set(newItem)
+                        userRef?.collection("Passwords")?.document(newItem.siteName)?.update(notificationMap as Map<String, Int>)
 
                         viewModel.passwordList.observe(viewLifecycleOwner) { passwordList ->
                             binding.recyclerView.adapter = PasswordAdapter(passwordList, {
+                                    cancelNotification(notificationID)
                                     userRef?.collection("Passwords")?.document(it.siteName)?.delete()
                                     viewModel.removeItem(it)
                                 }, {})
@@ -222,8 +226,10 @@ class ListFragment : Fragment() {
                             extractedStringFromDate)
                         viewModel.addItem(newItem)
                         userRef?.collection("Pins")?.document(newItem.description)?.set(newItem)
+                        userRef?.collection("Pins")?.document(newItem.description)?.update(notificationMap as Map<String, Int>)
                         viewModel.pinList.observe(viewLifecycleOwner) { pinList ->
                             binding.recyclerView.adapter = PinAdapter(pinList, {
+                                    cancelNotification(notificationID)
                                     userRef?.collection("Pins")?.document(it.description)?.delete()
                                     viewModel.removeItem(it)
                                 }, {})
@@ -237,8 +243,10 @@ class ListFragment : Fragment() {
                             extractedStringFromDate)
                         viewModel.addItem(newItem)
                         userRef?.collection("CreditCards")?.document(newItem.number)?.set(newItem)
+                        userRef?.collection("CreditCards")?.document(newItem.number)?.update(notificationMap as Map<String, Int>)
                         viewModel.ccList.observe(viewLifecycleOwner) { ccList ->
                             binding.recyclerView.adapter = CCAdapter(ccList, {
+                                    cancelNotification(notificationID)
                                     userRef?.collection("CreditCards")?.document(it.number)?.delete()
                                     viewModel.removeItem(it)
                                 }, {})
@@ -349,11 +357,15 @@ class ListFragment : Fragment() {
         // Sottrai un giorno
         calendar.add(Calendar.DAY_OF_MONTH, -1)
 
-        val intent = Intent(requireContext(), Notification::class.java)
+        // Prepara l'intent per la notifica con i dati aggiuntivi (titolo e testo)
+        val intent = Intent(requireContext(), Notification::class.java).apply {
+            putExtra("notification_title", "Qualcosa sta per scadere!")
+            putExtra("notification_text", "Accedi e modifica i campi.")
+        }
 
         val pendingIntent = PendingIntent.getBroadcast(
             requireContext(),
-            notificationID,
+            id,
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
@@ -370,6 +382,21 @@ class ListFragment : Fragment() {
         val msg = dateFormat.format(calendar.time)
 
         Toast.makeText(requireContext(), "Programmato in data: $msg", Toast.LENGTH_LONG).show()
+    }
+
+
+    private fun cancelNotification(notificationID: Int) {
+        val intent = Intent(requireContext(), Notification::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            requireContext(),
+            notificationID,
+            intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        val alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarmManager.cancel(pendingIntent)
+
+        Toast.makeText(requireContext(), "Notifica eliminata: $notificationID", Toast.LENGTH_LONG).show()
     }
 
 }
