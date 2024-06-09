@@ -48,13 +48,15 @@ class UsersFragment : Fragment() {
             viewModel.fetchUsersFromDatabase(user.uid)
             viewModel.usersList.observe(viewLifecycleOwner) { usersList ->
                 if (usersList.size == 1) {
-                    viewModel.userID = user.uid
+                    viewModel.user.id = user.uid
+                    viewModel.user.email = user.email.toString()
                     viewModel.fetchDataFromDatabase(user.uid)
                     Navigation.findNavController(view).navigate(R.id.action_usersFragment_to_mainFragment)
                 }
 
                 binding.usersRV.adapter = UserAdapter(usersList) { selectedUserId ->
-                    viewModel.userID = selectedUserId.id
+                    viewModel.user.id = selectedUserId.id
+                    viewModel.user.email = selectedUserId.email.toString()
                     viewModel.fetchDataFromDatabase(selectedUserId.id)
                     Navigation.findNavController(view).navigate(R.id.action_usersFragment_to_mainFragment)
                 }

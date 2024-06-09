@@ -24,7 +24,7 @@ class ManagerViewModel : ViewModel() {
         get() = _usersList
 
     var imageClicked: Int = 0
-    var userID: String? = null
+    var user: User = User("", "")
 
     fun addItem(password: Password) {
         val passwordList = _passwordList.value ?: mutableListOf()
@@ -198,7 +198,8 @@ class ManagerViewModel : ViewModel() {
                 }
 
                 if (usersList.size == 1) {
-                    userID = currentUser!!.uid
+                    user.id = currentUser!!.uid
+                    user.email = currentUser.email.toString()
                 }
 
                 _usersList.value = usersList

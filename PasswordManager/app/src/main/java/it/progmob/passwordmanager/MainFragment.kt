@@ -1,5 +1,10 @@
 package it.progmob.passwordmanager
 
+import android.annotation.SuppressLint
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -41,6 +46,7 @@ class MainFragment : Fragment() {
         return binding.root
     }
 
+    @SuppressLint("ScheduleExactAlarm")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -60,7 +66,30 @@ class MainFragment : Fragment() {
         }
 
         binding.backButton.setOnClickListener {
-            Navigation.findNavController(view).navigate(R.id.action_mainFragment_to_usersFragment)
+            val notificationID = System.currentTimeMillis().toInt()
+
+            val intent = Intent(requireContext(), Notification::class.java).apply {
+                putExtra("notification_title", "Reminder")
+                putExtra("notification_text", "This is your 1-minute reminder!")
+            }
+
+            val pendingIntent = PendingIntent.getBroadcast(
+                requireContext(),
+                notificationID,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            val alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            val triggerTime = System.currentTimeMillis() + 60 * 1000  // 1 minuto
+
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                triggerTime,
+                pendingIntent
+            )
+
+            Toast.makeText(requireContext(), "Alarm set.", Toast.LENGTH_LONG).show()
         }
     }
 }

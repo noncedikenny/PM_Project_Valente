@@ -6,7 +6,9 @@ import android.app.AlertDialog
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -60,7 +62,7 @@ class ListFragment : Fragment() {
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         val db = Firebase.firestore
-        val userRef = viewModel.userID?.let { it1 -> db.collection("users").document(it1) }
+        val userRef = db.collection("users").document(viewModel.user.id)
 
         /*
         * This part loads the wanted list to observe, through the image clicked in the main fragment.
@@ -82,7 +84,7 @@ class ListFragment : Fragment() {
                 {
                 viewModel.passwordList.observe(viewLifecycleOwner) { passwordList ->
                     binding.recyclerView.adapter = PasswordAdapter(passwordList, {
-                        userRef?.collection("Passwords")?.document(it.siteName)?.delete()
+                        userRef.collection("Passwords").document(it.siteName).delete()
                         viewModel.removeItem(it)
                     }, {})
                     binding.resetAllButton.setOnClickListener {
@@ -102,7 +104,7 @@ class ListFragment : Fragment() {
                 {
                 viewModel.pinList.observe(viewLifecycleOwner) { pinList ->
                     binding.recyclerView.adapter = PinAdapter(pinList, {
-                        userRef?.collection("Pins")?.document(it.description)?.delete()
+                        userRef.collection("Pins").document(it.description).delete()
                         viewModel.removeItem(it)
                     }, {})
                     binding.resetAllButton.setOnClickListener {
@@ -122,7 +124,7 @@ class ListFragment : Fragment() {
                 {
                 viewModel.ccList.observe(viewLifecycleOwner) { ccList ->
                     binding.recyclerView.adapter = CCAdapter(ccList, {
-                        userRef?.collection("CreditCards")?.document(it.number)?.delete()
+                        userRef.collection("CreditCards").document(it.number).delete()
                         viewModel.removeItem(it)
                     }, {})
                     binding.resetAllButton.setOnClickListener {
@@ -145,7 +147,7 @@ class ListFragment : Fragment() {
         datePicker.minDate = today.timeInMillis
         datePicker.init(today.get(Calendar.YEAR), today.get(Calendar.MONTH),
             today.get(Calendar.DAY_OF_MONTH)
-        ) { view, year, month, day -> }
+        ) { view, _, _, _ -> }
 
         // Setup checkbox
         expireCheckBox.setOnClickListener {
@@ -162,12 +164,13 @@ class ListFragment : Fragment() {
         * The click listener, if not overwrote, will show / hide the sensitive data (password, pin, card number etc...)
         */
         binding.addItem.setOnClickListener {
-            // Setup builder to build the popup
-            val dialogBuilder = AlertDialog.Builder(requireContext())
 
             val parent = viewInflated.parent as? ViewGroup
             parent?.removeView(viewInflated)
 
+
+            // Setup builder to build the popup
+            val dialogBuilder = AlertDialog.Builder(requireContext())
             dialogBuilder.setView(viewInflated)
             dialogBuilder.setTitle("Setup item")
             dialogBuilder.setCancelable(false)
@@ -196,7 +199,6 @@ class ListFragment : Fragment() {
 
                     val notificationID = System.currentTimeMillis().toInt()
                     val notificationMap = hashMapOf("notificationID" to notificationID)
-                    if (expireCheckBox.isChecked) scheduleNotification(datePicker, notificationID)
 
                     // Add a password
                     if(viewModel.imageClicked == 1) {
@@ -206,14 +208,20 @@ class ListFragment : Fragment() {
                             viewInflated.findViewById<EditText>(R.id.passwordInput).text.toString(),
                             extractedStringFromDate)
 
+                        if(expireCheckBox.isChecked) scheduleNotification(
+                            viewInflated.findViewById<EditText>(R.id.siteNameInput).text.toString(),
+                            viewModel.user.email,
+                            datePicker,
+                            notificationID)
+
                         viewModel.addItem(newItem)
-                        userRef?.collection("Passwords")?.document(newItem.siteName)?.set(newItem)
-                        userRef?.collection("Passwords")?.document(newItem.siteName)?.update(notificationMap as Map<String, Int>)
+                        userRef.collection("Passwords").document(newItem.siteName).set(newItem)
+                        userRef.collection("Passwords").document(newItem.siteName).update(notificationMap as Map<String, Int>)
 
                         viewModel.passwordList.observe(viewLifecycleOwner) { passwordList ->
                             binding.recyclerView.adapter = PasswordAdapter(passwordList, {
                                     cancelNotification(notificationID)
-                                    userRef?.collection("Passwords")?.document(it.siteName)?.delete()
+                                    userRef.collection("Passwords").document(it.siteName).delete()
                                     viewModel.removeItem(it)
                                 }, {})
                         }
@@ -224,13 +232,20 @@ class ListFragment : Fragment() {
                             viewInflated.findViewById<EditText>(R.id.pinDescriptionInput).text.toString(),
                             viewInflated.findViewById<EditText>(R.id.pinInput).text.toString(),
                             extractedStringFromDate)
+
+                        if(expireCheckBox.isChecked) scheduleNotification(
+                            viewInflated.findViewById<EditText>(R.id.pinDescriptionInput).text.toString(),
+                            viewModel.user.email,
+                            datePicker,
+                            notificationID)
+
                         viewModel.addItem(newItem)
-                        userRef?.collection("Pins")?.document(newItem.description)?.set(newItem)
-                        userRef?.collection("Pins")?.document(newItem.description)?.update(notificationMap as Map<String, Int>)
+                        userRef.collection("Pins").document(newItem.description).set(newItem)
+                        userRef.collection("Pins").document(newItem.description).update(notificationMap as Map<String, Int>)
                         viewModel.pinList.observe(viewLifecycleOwner) { pinList ->
                             binding.recyclerView.adapter = PinAdapter(pinList, {
                                     cancelNotification(notificationID)
-                                    userRef?.collection("Pins")?.document(it.description)?.delete()
+                                    userRef.collection("Pins").document(it.description).delete()
                                     viewModel.removeItem(it)
                                 }, {})
                         }
@@ -241,13 +256,20 @@ class ListFragment : Fragment() {
                             viewInflated.findViewById<EditText>(R.id.cardNumberInput).text.toString(),
                             viewInflated.findViewById<EditText>(R.id.cardSafetyCodeInput).text.toString(),
                             extractedStringFromDate)
+
+                        if(expireCheckBox.isChecked) scheduleNotification(
+                            viewInflated.findViewById<EditText>(R.id.cardNumberInput).text.toString(),
+                            viewModel.user.email,
+                            datePicker,
+                            notificationID)
+
                         viewModel.addItem(newItem)
-                        userRef?.collection("CreditCards")?.document(newItem.number)?.set(newItem)
-                        userRef?.collection("CreditCards")?.document(newItem.number)?.update(notificationMap as Map<String, Int>)
+                        userRef.collection("CreditCards").document(newItem.number).set(newItem)
+                        userRef.collection("CreditCards").document(newItem.number).update(notificationMap as Map<String, Int>)
                         viewModel.ccList.observe(viewLifecycleOwner) { ccList ->
                             binding.recyclerView.adapter = CCAdapter(ccList, {
                                     cancelNotification(notificationID)
-                                    userRef?.collection("CreditCards")?.document(it.number)?.delete()
+                                    userRef.collection("CreditCards").document(it.number).delete()
                                     viewModel.removeItem(it)
                                 }, {})
                         }
@@ -289,18 +311,26 @@ class ListFragment : Fragment() {
         alertDialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setOnClickListener {
             val db = Firebase.firestore
 
-            val userRef = viewModel.userID?.let { it1 -> db.collection("users").document(it1) }
+            val userRef = db.collection("users").document(viewModel.user.id)
 
-            userRef?.collection(collectionToDelete)?.get()
-                ?.addOnSuccessListener { documents ->
-                    if (documents.isEmpty) Toast.makeText(requireContext(), "Nothing to reset.", Toast.LENGTH_LONG).show()
-                    else {
+            userRef.collection(collectionToDelete).get()
+                .addOnSuccessListener { documents ->
+                    if (documents.isEmpty) {
+                        Toast.makeText(requireContext(), "Nothing to reset.", Toast.LENGTH_LONG).show()
+                    } else {
                         for (document in documents) {
+                            // Cancella la notifica legata a questo documento
+                            val notificationID = document.getLong("notificationID")?.toInt()
+                            if (notificationID != null) {
+                                cancelNotification(notificationID)
+                            }
+
+                            // Cancella il documento
                             document.reference.delete()
                         }
                         Toast.makeText(requireContext(), "Everything has been deleted correctly.", Toast.LENGTH_LONG).show()
                     }
-                };
+                }
 
             alertDialog.dismiss()
 
@@ -343,8 +373,14 @@ class ListFragment : Fragment() {
     }
 
     @SuppressLint("ScheduleExactAlarm")
-    private fun scheduleNotification(datePicker: DatePicker, id: Int) {
-        // I NOTIFICATIONID DEVONO ESSERE UNICI, GESTISCI LA CASISTICA
+    private fun scheduleNotification(itemName: String, userEmail: String, datePicker: DatePicker, id: Int) {
+
+        val alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
+            if (!alarmManager.canScheduleExactAlarms()) {
+                return
+            }
+        }
 
         val day = datePicker.dayOfMonth
         val month = datePicker.month
@@ -359,8 +395,8 @@ class ListFragment : Fragment() {
 
         // Prepara l'intent per la notifica con i dati aggiuntivi (titolo e testo)
         val intent = Intent(requireContext(), Notification::class.java).apply {
-            putExtra("notification_title", "Qualcosa sta per scadere!")
-            putExtra("notification_text", "Accedi e modifica i campi.")
+            putExtra("notification_title", "$itemName will expire tomorrow!")
+            putExtra("notification_text", "$itemName from $userEmail item's will expire tomorrow, an update is required.")
         }
 
         val pendingIntent = PendingIntent.getBroadcast(
@@ -370,7 +406,6 @@ class ListFragment : Fragment() {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        val alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val time = calendar.timeInMillis
         alarmManager.setExactAndAllowWhileIdle(
             AlarmManager.RTC_WAKEUP,
@@ -386,6 +421,14 @@ class ListFragment : Fragment() {
 
 
     private fun cancelNotification(notificationID: Int) {
+
+        val alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
+            if (!alarmManager.canScheduleExactAlarms()) {
+                return
+            }
+        }
+
         val intent = Intent(requireContext(), Notification::class.java)
         val pendingIntent = PendingIntent.getBroadcast(
             requireContext(),
@@ -393,10 +436,7 @@ class ListFragment : Fragment() {
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-        val alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
         alarmManager.cancel(pendingIntent)
-
-        Toast.makeText(requireContext(), "Notifica eliminata: $notificationID", Toast.LENGTH_LONG).show()
     }
 
 }
