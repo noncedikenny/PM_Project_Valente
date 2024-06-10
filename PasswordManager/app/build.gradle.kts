@@ -65,4 +65,5 @@ dependencies {
     implementation("com.google.guava:guava:30.1-android")
     implementation("com.firebaseui:firebase-ui-auth:7.2.0")
     implementation("com.google.android.gms:play-services-auth:20.0.1")
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
 }

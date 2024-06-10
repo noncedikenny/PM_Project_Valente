@@ -397,6 +397,7 @@ class ListFragment : Fragment() {
         val intent = Intent(requireContext(), Notification::class.java).apply {
             putExtra("notification_title", "$itemName will expire tomorrow!")
             putExtra("notification_text", "$itemName from $userEmail item's will expire tomorrow, an update is required.")
+            putExtra("notification_id", id)
         }
 
         val pendingIntent = PendingIntent.getBroadcast(

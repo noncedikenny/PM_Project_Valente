@@ -1,5 +1,6 @@
 package it.progmob.passwordmanager
 
+import NotificationWorker
 import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.PendingIntent
@@ -15,6 +16,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.Navigation
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkRequest
 import it.progmob.passwordmanager.databinding.MainFragmentBinding
 
 class MainFragment : Fragment() {
@@ -66,30 +70,15 @@ class MainFragment : Fragment() {
         }
 
         binding.backButton.setOnClickListener {
-            val notificationID = System.currentTimeMillis().toInt()
-
-            val intent = Intent(requireContext(), Notification::class.java).apply {
-                putExtra("notification_title", "Reminder")
-                putExtra("notification_text", "This is your 1-minute reminder!")
-            }
-
-            val pendingIntent = PendingIntent.getBroadcast(
-                requireContext(),
-                notificationID,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-
-            val alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            val triggerTime = System.currentTimeMillis() + 60 * 1000  // 1 minuto
-
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                triggerTime,
-                pendingIntent
-            )
+            // Create the WorkRequest
+            val myWorkRequest: WorkRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
+                .build()
+            // Enqueue the WorkRequest
+            val workManager = WorkManager.getInstance(requireContext())
+            workManager.enqueue(myWorkRequest)
 
             Toast.makeText(requireContext(), "Alarm set.", Toast.LENGTH_LONG).show()
         }
+
     }
 }

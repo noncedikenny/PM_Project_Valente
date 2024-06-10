@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 
-const val notificationID = 1
 const val channelID = "channel1"
 
 class Notification : BroadcastReceiver() {
@@ -14,6 +13,7 @@ class Notification : BroadcastReceiver() {
         // Estrai il titolo e il testo della notifica dagli extra dell'intent
         val title = intent.getStringExtra("notification_title")
         val text = intent.getStringExtra("notification_text")
+        val id = intent.getLongExtra("notification_id", System.currentTimeMillis()).toInt()
 
         // Costruisci la notifica utilizzando il titolo e il testo estratti
         val notification = NotificationCompat.Builder(context, channelID)
@@ -24,6 +24,6 @@ class Notification : BroadcastReceiver() {
 
         // Ottieni il NotificationManager e mostra la notifica
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        manager.notify(notificationID, notification)
+        manager.notify(id, notification)
     }
 }
