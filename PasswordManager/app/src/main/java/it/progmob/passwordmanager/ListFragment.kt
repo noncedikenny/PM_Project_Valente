@@ -75,14 +75,15 @@ class ListFragment : Fragment() {
                 // Observing passwords
                 {
                 viewModel.passwordList.observe(viewLifecycleOwner) { passwordList ->
-                    binding.recyclerView.adapter = PasswordAdapter(passwordList, {
+                    val decryptedPasswordList = observeDecryptedPasswords(passwordList)
+                    binding.recyclerView.adapter = PasswordAdapter(decryptedPasswordList, {
                         userRef.collection("Passwords").document(it.siteName).delete()
                         viewModel.removeItem(it)
                     }, {})
-                    binding.resetAllButton.setOnClickListener {
-                        resetFunction("Passwords")
-                    }
                     binding.itemNameView.text = "Passwords"
+                }
+                binding.resetAllButton.setOnClickListener {
+                    resetFunction("Passwords")
                 }
 
                 // Initialize variables
@@ -95,14 +96,15 @@ class ListFragment : Fragment() {
                 // Observing pins
                 {
                 viewModel.pinList.observe(viewLifecycleOwner) { pinList ->
-                    binding.recyclerView.adapter = PinAdapter(pinList, {
+                    val decryptedPinList = observeDecryptedPins(pinList)
+                    binding.recyclerView.adapter = PinAdapter(decryptedPinList, {
                         userRef.collection("Pins").document(it.description).delete()
                         viewModel.removeItem(it)
                     }, {})
-                    binding.resetAllButton.setOnClickListener {
-                        resetFunction("Pins")
-                    }
                     binding.itemNameView.text = "Pins"
+                }
+                binding.resetAllButton.setOnClickListener {
+                    resetFunction("Pins")
                 }
 
                 // Initialize variables
@@ -115,7 +117,8 @@ class ListFragment : Fragment() {
                 // Observing credit cards
                 {
                 viewModel.ccList.observe(viewLifecycleOwner) { ccList ->
-                    binding.recyclerView.adapter = CCAdapter(ccList, {
+                    val decryptedCCList = observeDecryptedCreditCards(ccList)
+                    binding.recyclerView.adapter = CCAdapter(decryptedCCList, {
                         userRef.collection("CreditCards").document(it.number).delete()
                         viewModel.removeItem(it)
                     }, {})
@@ -194,10 +197,17 @@ class ListFragment : Fragment() {
 
                     // Add a password
                     if(viewModel.imageClicked == 1) {
+                        val encryptedPassword: String = AESEncyption.encrypt(viewInflated.findViewById<EditText>(R.id.passwordInput).text.toString())
+
+                        if(encryptedPassword == "-") {
+                            Toast.makeText(requireContext(), "Something gone wrong, retry or contact the assistance.", Toast.LENGTH_SHORT).show()
+                            alertDialog.dismiss()
+                        }
+
                         val newItem = Password(
                             viewInflated.findViewById<EditText>(R.id.siteNameInput).text.toString(),
                             viewInflated.findViewById<EditText>(R.id.usernameInput).text.toString(),
-                            viewInflated.findViewById<EditText>(R.id.passwordInput).text.toString(),
+                            encryptedPassword,
                             extractedStringFromDate)
 
                         if(expireCheckBox.isChecked) scheduleNotification(
@@ -211,7 +221,8 @@ class ListFragment : Fragment() {
                         userRef.collection("Passwords").document(newItem.siteName).update(notificationMap as Map<String, Int>)
 
                         viewModel.passwordList.observe(viewLifecycleOwner) { passwordList ->
-                            binding.recyclerView.adapter = PasswordAdapter(passwordList, {
+                            val decryptedPasswordList = observeDecryptedPasswords(passwordList)
+                            binding.recyclerView.adapter = PasswordAdapter(decryptedPasswordList, {
                                     cancelNotification(notificationID)
                                     userRef.collection("Passwords").document(it.siteName).delete()
                                     viewModel.removeItem(it)
@@ -220,9 +231,16 @@ class ListFragment : Fragment() {
                     }
                     // Add a pin
                     else if(viewModel.imageClicked == 2) {
+                        val encryptedPin: String = AESEncyption.encrypt(viewInflated.findViewById<EditText>(R.id.pinInput).text.toString())
+
+                        if(encryptedPin == "-") {
+                            Toast.makeText(requireContext(), "Something gone wrong, retry or contact the assistance.", Toast.LENGTH_SHORT).show()
+                            alertDialog.dismiss()
+                        }
+
                         val newItem = Pin(
                             viewInflated.findViewById<EditText>(R.id.pinDescriptionInput).text.toString(),
-                            viewInflated.findViewById<EditText>(R.id.pinInput).text.toString(),
+                            encryptedPin,
                             extractedStringFromDate)
 
                         if(expireCheckBox.isChecked) scheduleNotification(
@@ -235,7 +253,8 @@ class ListFragment : Fragment() {
                         userRef.collection("Pins").document(newItem.description).set(newItem)
                         userRef.collection("Pins").document(newItem.description).update(notificationMap as Map<String, Int>)
                         viewModel.pinList.observe(viewLifecycleOwner) { pinList ->
-                            binding.recyclerView.adapter = PinAdapter(pinList, {
+                            val decryptedPinList = observeDecryptedPins(pinList)
+                            binding.recyclerView.adapter = PinAdapter(decryptedPinList, {
                                     cancelNotification(notificationID)
                                     userRef.collection("Pins").document(it.description).delete()
                                     viewModel.removeItem(it)
@@ -244,9 +263,17 @@ class ListFragment : Fragment() {
                     }
                     // Add a credit card
                     else if(viewModel.imageClicked == 3) {
+                        val encryptedNumber: String = AESEncyption.encrypt(viewInflated.findViewById<EditText>(R.id.cardNumberInput).text.toString())
+                        val encryptedSecurityCode: String = AESEncyption.encrypt(viewInflated.findViewById<EditText>(R.id.cardSafetyCodeInput).text.toString())
+
+                        if(encryptedNumber == "-" || encryptedSecurityCode == "-") {
+                            Toast.makeText(requireContext(), "Something gone wrong, retry or contact the assistance.", Toast.LENGTH_SHORT).show()
+                            alertDialog.dismiss()
+                        }
+
                         val newItem = CreditCard(
-                            viewInflated.findViewById<EditText>(R.id.cardNumberInput).text.toString(),
-                            viewInflated.findViewById<EditText>(R.id.cardSafetyCodeInput).text.toString(),
+                            encryptedNumber,
+                            encryptedSecurityCode,
                             extractedStringFromDate)
 
                         if(expireCheckBox.isChecked) scheduleNotification(
@@ -256,10 +283,11 @@ class ListFragment : Fragment() {
                             notificationID)
 
                         viewModel.addItem(newItem)
-                        userRef.collection("CreditCards").document(newItem.number).set(newItem)
-                        userRef.collection("CreditCards").document(newItem.number).update(notificationMap as Map<String, Int>)
+                        userRef.collection("CreditCards").document(viewInflated.findViewById<EditText>(R.id.cardNumberInput).text.toString()).set(newItem)
+                        userRef.collection("CreditCards").document(viewInflated.findViewById<EditText>(R.id.cardNumberInput).text.toString()).update(notificationMap as Map<String, Int>)
                         viewModel.ccList.observe(viewLifecycleOwner) { ccList ->
-                            binding.recyclerView.adapter = CCAdapter(ccList, {
+                            val decryptedCCList = observeDecryptedCreditCards(ccList)
+                            binding.recyclerView.adapter = CCAdapter(decryptedCCList, {
                                     cancelNotification(notificationID)
                                     userRef.collection("CreditCards").document(it.number).delete()
                                     viewModel.removeItem(it)

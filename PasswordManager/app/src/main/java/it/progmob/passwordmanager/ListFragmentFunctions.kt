@@ -165,7 +165,40 @@ internal fun ListFragment.cancelNotification(notificationID: Int) {
     alarmManager.cancel(pendingIntent)
 }
 
+internal fun observeDecryptedPasswords(list: List<Password>): List<Password> {
+    return list.map { passwordItem ->
+        val decryptedPassword = AESEncyption.decrypt(passwordItem.password)
+        Password(
+            passwordItem.siteName,
+            passwordItem.username,
+            decryptedPassword,  // Usa la password decriptata
+            passwordItem.expirationDate
+        )
+    }
+}
 
+internal fun observeDecryptedPins(list: List<Pin>): List<Pin> {
+    return list.map { pinItem ->
+        val decryptedPin = AESEncyption.decrypt(pinItem.password)
+        Pin(
+            pinItem.description,
+            decryptedPin,
+            pinItem.expirationDate
+        )
+    }
+}
+
+internal fun observeDecryptedCreditCards(list: List<CreditCard>): List<CreditCard> {
+    return list.map { ccItem ->
+        val decryptedCCNumber = AESEncyption.decrypt(ccItem.number)
+        val decryptedCCSecurityCode = AESEncyption.decrypt(ccItem.securityCode)
+        CreditCard(
+            decryptedCCNumber,
+            decryptedCCSecurityCode,
+            ccItem.expirationDate
+        )
+    }
+}
 
 fun generateRandom(length: Int): String {
     val lowercaseChars = ('a'..'z').toList()
