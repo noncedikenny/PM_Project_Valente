@@ -16,10 +16,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.Navigation
+import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
 import it.progmob.passwordmanager.databinding.MainFragmentBinding
+import java.util.Calendar
 
 class MainFragment : Fragment() {
 
@@ -70,9 +72,23 @@ class MainFragment : Fragment() {
         }
 
         binding.backButton.setOnClickListener {
+            val notificationID = System.currentTimeMillis().toInt()
+
+            val calendar = Calendar.getInstance()
+            val time = calendar.timeInMillis + 10 * 1000
+
             // Create the WorkRequest
-            val myWorkRequest: WorkRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
+            val inputData = Data.Builder()
+                .putString("itemName", "Oggetto")
+                .putString("userEmail", "Email")
+                .putInt("notificationID", notificationID)
+                .putLong("triggerTime", time)
                 .build()
+
+            val myWorkRequest: WorkRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
+                .setInputData(inputData)
+                .build()
+
             // Enqueue the WorkRequest
             val workManager = WorkManager.getInstance(requireContext())
             workManager.enqueue(myWorkRequest)
