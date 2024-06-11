@@ -1,5 +1,6 @@
 package it.progmob.passwordmanager
 
+import NotificationWorker
 import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.AlertDialog
@@ -22,6 +23,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.work.Data
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkRequest
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import it.progmob.passwordmanager.databinding.ListFragmentBinding
@@ -374,14 +379,6 @@ class ListFragment : Fragment() {
 
     @SuppressLint("ScheduleExactAlarm")
     private fun scheduleNotification(itemName: String, userEmail: String, datePicker: DatePicker, id: Int) {
-
-        val alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
-            if (!alarmManager.canScheduleExactAlarms()) {
-                return
-            }
-        }
-
         val day = datePicker.dayOfMonth
         val month = datePicker.month
         val year = datePicker.year
@@ -393,26 +390,22 @@ class ListFragment : Fragment() {
         // Sottrai un giorno
         calendar.add(Calendar.DAY_OF_MONTH, -1)
 
-        // Prepara l'intent per la notifica con i dati aggiuntivi (titolo e testo)
-        val intent = Intent(requireContext(), Notification::class.java).apply {
-            putExtra("notification_title", "$itemName will expire tomorrow!")
-            putExtra("notification_text", "$itemName from $userEmail item's will expire tomorrow, an update is required.")
-            putExtra("notification_id", id)
-        }
-
-        val pendingIntent = PendingIntent.getBroadcast(
-            requireContext(),
-            id,
-            intent,
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        )
-
         val time = calendar.timeInMillis
-        alarmManager.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            time,
-            pendingIntent
-        )
+
+        val inputData = Data.Builder()
+            .putString("itemName", itemName)
+            .putString("userEmail", userEmail)
+            .putInt("notificationID", id)
+            .putLong("triggerTime", time)
+            .build()
+
+        val myWorkRequest: WorkRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
+            .setInputData(inputData)
+            .build()
+
+        // Enqueue the WorkRequest
+        val workManager = WorkManager.getInstance(requireContext())
+        workManager.enqueue(myWorkRequest)
 
         val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
         val msg = dateFormat.format(calendar.time)

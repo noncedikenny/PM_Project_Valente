@@ -13,7 +13,7 @@ class Notification : BroadcastReceiver() {
         // Estrai il titolo e il testo della notifica dagli extra dell'intent
         val title = intent.getStringExtra("notification_title")
         val text = intent.getStringExtra("notification_text")
-        val id = intent.getLongExtra("notification_id", System.currentTimeMillis()).toInt()
+        val id = intent.getIntExtra("notification_id", System.currentTimeMillis().toInt())
 
         // Costruisci la notifica utilizzando il titolo e il testo estratti
         val notification = NotificationCompat.Builder(context, channelID)
