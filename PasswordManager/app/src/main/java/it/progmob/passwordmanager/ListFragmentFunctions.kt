@@ -10,6 +10,7 @@ import android.content.Intent
 import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.CheckBox
 import android.widget.DatePicker
 import android.widget.EditText
 import android.widget.Toast
@@ -23,6 +24,116 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
+// NOTIFICATION FUNCTIONS
+// The two functions below are useful for preparing, sending and deleting notifications.
+// BroadcastReceivers and Workers were used.
+@SuppressLint("ScheduleExactAlarm")
+internal fun ListFragment.scheduleNotification(checkBox: CheckBox, itemName: String, userEmail: String, datePicker: DatePicker, id: Int) {
+    if(!checkBox.isChecked) return
+
+    val day = datePicker.dayOfMonth
+    val month = datePicker.month
+    val year = datePicker.year
+
+    // Set the calendar
+    //val calendar = Calendar.getInstance()
+    //calendar.set(year, month, day)
+
+    // Subtract a day
+    //calendar.add(Calendar.DAY_OF_MONTH, -1)
+
+    //val time = calendar.timeInMillis
+
+    //UNCOMMENT THIS PART ONLY IF YOU'RE DEBUGGING.
+    //INSTEAD COMMENT THE PART ABOVE.
+    val calendar = Calendar.getInstance()
+    val time = calendar.timeInMillis + 10 * 1000
+
+    val inputData = Data.Builder()
+        .putString("itemName", itemName)
+        .putString("userEmail", userEmail)
+        .putInt("notificationID", id)
+        .putLong("triggerTime", time)
+        .build()
+
+    val myWorkRequest: WorkRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
+        .setInputData(inputData)
+        .build()
+
+    // Enqueue the WorkRequest
+    val workManager = WorkManager.getInstance(requireContext())
+    workManager.enqueue(myWorkRequest)
+
+    val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+    val msg = dateFormat.format(calendar.time)
+
+    Toast.makeText(requireContext(), "Programmato in data: $msg", Toast.LENGTH_LONG).show()
+}
+
+internal fun ListFragment.cancelNotification(notificationID: Int) {
+
+    val alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
+        if (!alarmManager.canScheduleExactAlarms()) {
+            return
+        }
+    }
+
+    val intent = Intent(requireContext(), Notification::class.java)
+    val pendingIntent = PendingIntent.getBroadcast(
+        requireContext(),
+        notificationID,
+        intent,
+        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+    )
+    alarmManager.cancel(pendingIntent)
+}
+
+
+// OBSERVE DECRYPTED ITEM FUNCTIONS
+// The three functions below are useful for decrypting any list of item passed.
+internal fun observeDecryptedPasswords(list: List<Password>): List<Password> {
+    return list.map { passwordItem ->
+        val decryptedPassword = AESEncyption.decrypt(passwordItem.password)
+        Password(
+            passwordItem.siteName,
+            passwordItem.username,
+            decryptedPassword,  // Usa la password decriptata
+            passwordItem.expirationDate,
+            passwordItem.notificationID
+        )
+    }
+}
+
+internal fun observeDecryptedPins(list: List<Pin>): List<Pin> {
+    return list.map { pinItem ->
+        val decryptedPin = AESEncyption.decrypt(pinItem.password)
+        Pin(
+            pinItem.description,
+            decryptedPin,
+            pinItem.expirationDate,
+            pinItem.notificationID
+        )
+    }
+}
+
+internal fun observeDecryptedCreditCards(list: List<CreditCard>): List<CreditCard> {
+    return list.map { ccItem ->
+        val decryptedCCNumber = AESEncyption.decrypt(ccItem.number)
+        val decryptedCCSecurityCode = AESEncyption.decrypt(ccItem.securityCode)
+        CreditCard(
+            ccItem.description,
+            decryptedCCNumber,
+            decryptedCCSecurityCode,
+            ccItem.expirationDate,
+            ccItem.notificationID
+        )
+    }
+}
+
+
+// UTILITY FUNCTIONS
+// The functions below are useful for making the code readable.
 internal fun ListFragment.resetFunction(collectionToDelete: String) {
     val dialogBuilder = AlertDialog.Builder(requireContext())
     val viewInflated: View = LayoutInflater.from(requireContext()).inflate(R.layout.confirm_layout, null, false)
@@ -83,7 +194,8 @@ internal fun emptyCheck(imageClicked: Int, viewInflated: View): Boolean {
             viewInflated.findViewById<EditText>(R.id.pinInput).text.toString().isEmpty()) {
             return true
         }
-        3 -> if(viewInflated.findViewById<EditText>(R.id.cardNumberInput).text.toString().isEmpty() ||
+        3 -> if(viewInflated.findViewById<EditText>(R.id.cardDescriptionInput).text.toString().isEmpty() ||
+            viewInflated.findViewById<EditText>(R.id.cardNumberInput).text.toString().isEmpty() ||
             viewInflated.findViewById<EditText>(R.id.cardSafetyCodeInput).text.toString().isEmpty()) {
             return true
         }
@@ -104,103 +216,15 @@ internal fun getSelectedDateFromDatePicker(datePicker: DatePicker): String {
     return dateFormat.format(calendar.time)
 }
 
-@SuppressLint("ScheduleExactAlarm")
-internal fun ListFragment.scheduleNotification(itemName: String, userEmail: String, datePicker: DatePicker, id: Int) {
-    val day = datePicker.dayOfMonth
-    val month = datePicker.month
-    val year = datePicker.year
-
-    // Set the calendar
-    //val calendar = Calendar.getInstance()
-    //calendar.set(year, month, day)
-
-    // Subtract a day
-    //calendar.add(Calendar.DAY_OF_MONTH, -1)
-
-    //val time = calendar.timeInMillis
-
-    //UNCOMMENT THIS PART ONLY IF YOU'RE DEBUGGING.
-    //INSTEAD COMMENT THE PART ABOVE.
-    val calendar = Calendar.getInstance()
-    val time = calendar.timeInMillis + 10 * 1000
-
-    val inputData = Data.Builder()
-        .putString("itemName", itemName)
-        .putString("userEmail", userEmail)
-        .putInt("notificationID", id)
-        .putLong("triggerTime", time)
-        .build()
-
-    val myWorkRequest: WorkRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
-        .setInputData(inputData)
-        .build()
-
-    // Enqueue the WorkRequest
-    val workManager = WorkManager.getInstance(requireContext())
-    workManager.enqueue(myWorkRequest)
-
-    val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
-    val msg = dateFormat.format(calendar.time)
-
-    Toast.makeText(requireContext(), "Programmato in data: $msg", Toast.LENGTH_LONG).show()
-}
-
-
-internal fun ListFragment.cancelNotification(notificationID: Int) {
-
-    val alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
-        if (!alarmManager.canScheduleExactAlarms()) {
-            return
-        }
+internal fun ListFragment.encryptionSucceed(fieldToCheck: String) : Boolean {
+    if(fieldToCheck == "-") {
+        Toast.makeText(requireContext(), "Something gone wrong, retry or contact the assistance.", Toast.LENGTH_SHORT).show()
+        return false
     }
-
-    val intent = Intent(requireContext(), Notification::class.java)
-    val pendingIntent = PendingIntent.getBroadcast(
-        requireContext(),
-        notificationID,
-        intent,
-        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-    )
-    alarmManager.cancel(pendingIntent)
+    return true
 }
 
-internal fun observeDecryptedPasswords(list: List<Password>): List<Password> {
-    return list.map { passwordItem ->
-        val decryptedPassword = AESEncyption.decrypt(passwordItem.password)
-        Password(
-            passwordItem.siteName,
-            passwordItem.username,
-            decryptedPassword,  // Usa la password decriptata
-            passwordItem.expirationDate
-        )
-    }
-}
-
-internal fun observeDecryptedPins(list: List<Pin>): List<Pin> {
-    return list.map { pinItem ->
-        val decryptedPin = AESEncyption.decrypt(pinItem.password)
-        Pin(
-            pinItem.description,
-            decryptedPin,
-            pinItem.expirationDate
-        )
-    }
-}
-
-internal fun observeDecryptedCreditCards(list: List<CreditCard>): List<CreditCard> {
-    return list.map { ccItem ->
-        val decryptedCCNumber = AESEncyption.decrypt(ccItem.number)
-        val decryptedCCSecurityCode = AESEncyption.decrypt(ccItem.securityCode)
-        CreditCard(
-            decryptedCCNumber,
-            decryptedCCSecurityCode,
-            ccItem.expirationDate
-        )
-    }
-}
-
-fun generateRandom(length: Int): String {
+fun generateRandomPassword(length: Int): String {
     val lowercaseChars = ('a'..'z').toList()
     val uppercaseChars = ('A'..'Z').toList()
     val digitChars = ('0'..'9').toList()
@@ -213,6 +237,20 @@ fun generateRandom(length: Int): String {
 
     val randomChars = (1..remainingChars)
         .map { allChars.random() }
+
+    val shuffledPassword = (requiredChars + randomChars).shuffled()
+
+    return shuffledPassword.joinToString("")
+}
+
+fun generateRandomPin(length: Int): String {
+    val digitChars = ('0'..'9').toList()
+
+    val requiredChars = listOf(digitChars).map { it.random() }
+    val remainingChars = (length - requiredChars.size).coerceAtLeast(0)
+
+    val randomChars = (1..remainingChars)
+        .map { digitChars.random() }
 
     val shuffledPassword = (requiredChars + randomChars).shuffled()
 

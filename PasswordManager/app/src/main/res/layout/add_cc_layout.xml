@@ -25,9 +25,9 @@
         android:ems="10"
         android:hint="Card number"
         android:inputType="number"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="@+id/cardDescriptionInput"
+        app:layout_constraintStart_toStartOf="@+id/cardDescriptionInput"
+        app:layout_constraintTop_toBottomOf="@+id/cardDescriptionInput" />
 
     <EditText
         android:id="@+id/cardSafetyCodeInput"
@@ -50,4 +50,16 @@
         app:layout_constraintEnd_toEndOf="@+id/cardSafetyCodeInput"
         app:layout_constraintStart_toStartOf="@+id/cardSafetyCodeInput"
         app:layout_constraintTop_toBottomOf="@+id/cardSafetyCodeInput" />
+
+    <EditText
+        android:id="@+id/cardDescriptionInput"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:ems="10"
+        android:hint="Description"
+        android:inputType="text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

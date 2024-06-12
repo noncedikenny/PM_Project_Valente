@@ -55,6 +55,9 @@ class ListFragment : Fragment() {
 
         val db = Firebase.firestore
         val userRef = db.collection("users").document(viewModel.user.id)
+        val passwordCollection = userRef.collection("Passwords")
+        val pinCollection = userRef.collection("Pins")
+        val ccCollection = userRef.collection("CreditCards")
 
         /*
         * This part loads the wanted list to observe, through the image clicked in the main fragment.
@@ -70,18 +73,18 @@ class ListFragment : Fragment() {
         lateinit var expireCheckBox: CheckBox
 
         when (viewModel.imageClicked) {
-
             1 ->
                 // Observing passwords
                 {
                 viewModel.passwordList.observe(viewLifecycleOwner) { passwordList ->
                     val decryptedPasswordList = observeDecryptedPasswords(passwordList)
                     binding.recyclerView.adapter = PasswordAdapter(decryptedPasswordList, {
-                        userRef.collection("Passwords").document(it.siteName).delete()
+                        cancelNotification(it.notificationID)
+                        passwordCollection.document(it.siteName).delete()
                         viewModel.removeItem(it)
                     }, {})
-                    binding.itemNameView.text = "Passwords"
                 }
+                binding.itemNameView.text = "Passwords"
                 binding.resetAllButton.setOnClickListener {
                     resetFunction("Passwords")
                 }
@@ -98,11 +101,12 @@ class ListFragment : Fragment() {
                 viewModel.pinList.observe(viewLifecycleOwner) { pinList ->
                     val decryptedPinList = observeDecryptedPins(pinList)
                     binding.recyclerView.adapter = PinAdapter(decryptedPinList, {
-                        userRef.collection("Pins").document(it.description).delete()
+                        cancelNotification(it.notificationID)
+                        pinCollection.document(it.description).delete()
                         viewModel.removeItem(it)
                     }, {})
-                    binding.itemNameView.text = "Pins"
                 }
+                binding.itemNameView.text = "Pins"
                 binding.resetAllButton.setOnClickListener {
                     resetFunction("Pins")
                 }
@@ -119,13 +123,14 @@ class ListFragment : Fragment() {
                 viewModel.ccList.observe(viewLifecycleOwner) { ccList ->
                     val decryptedCCList = observeDecryptedCreditCards(ccList)
                     binding.recyclerView.adapter = CCAdapter(decryptedCCList, {
-                        userRef.collection("CreditCards").document(it.number).delete()
+                        cancelNotification(it.notificationID)
+                        ccCollection.document(it.description).delete()
                         viewModel.removeItem(it)
                     }, {})
-                    binding.resetAllButton.setOnClickListener {
-                        resetFunction("CreditCards")
-                    }
-                    binding.itemNameView.text = "Credit Cards"
+                }
+                binding.itemNameView.text = "Credit Cards"
+                binding.resetAllButton.setOnClickListener {
+                    resetFunction("CreditCards")
                 }
 
                 // Initialize variables
@@ -134,7 +139,10 @@ class ListFragment : Fragment() {
                 expireCheckBox = viewInflated.findViewById(R.id.expireCreditCardCheckBox)
             }
 
-            else -> null
+            else -> {
+                Navigation.findNavController(view).navigate(R.id.action_listFragment_to_mainFragment)
+                Toast.makeText(requireContext(), "Something gone wrong, retry or contact the assistance.", Toast.LENGTH_SHORT).show()
+            }
         }
 
         // Initialize date picker
@@ -159,10 +167,9 @@ class ListFragment : Fragment() {
         * The click listener, if not overwrote, will show / hide the sensitive data (password, pin, card number etc...)
         */
         binding.addItem.setOnClickListener {
-
+            // Check if the popup was removed from parent correctly, if not remove it
             val parent = viewInflated.parent as? ViewGroup
             parent?.removeView(viewInflated)
-
 
             // Setup builder to build the popup
             val dialogBuilder = AlertDialog.Builder(requireContext())
@@ -186,45 +193,42 @@ class ListFragment : Fragment() {
 
                 if (somethingIsEmpty) Toast.makeText(requireContext(), "Every field must be filled.", Toast.LENGTH_SHORT).show()
                 else {
-                    val extractedStringFromDate = if (expireCheckBox.isChecked) {
-                        getSelectedDateFromDatePicker(datePicker)
-                    } else {
-                        "Doesn't expire."
-                    }
-
-                    val notificationID = System.currentTimeMillis().toInt()
-                    val notificationMap = hashMapOf("notificationID" to notificationID)
+                    val extractedStringFromDate = if (expireCheckBox.isChecked) getSelectedDateFromDatePicker(datePicker)
+                                                  else "Doesn't expire."
+                    val notificationID = if (expireCheckBox.isChecked) System.currentTimeMillis().toInt()
+                                         else 0
+                    val databaseNotificationID = hashMapOf("notificationID" to notificationID)
 
                     // Add a password
                     if(viewModel.imageClicked == 1) {
                         val encryptedPassword: String = AESEncyption.encrypt(viewInflated.findViewById<EditText>(R.id.passwordInput).text.toString())
-
-                        if(encryptedPassword == "-") {
-                            Toast.makeText(requireContext(), "Something gone wrong, retry or contact the assistance.", Toast.LENGTH_SHORT).show()
+                        if(!encryptionSucceed(encryptedPassword)) {
                             alertDialog.dismiss()
+                            return@setOnClickListener
                         }
 
                         val newItem = Password(
                             viewInflated.findViewById<EditText>(R.id.siteNameInput).text.toString(),
                             viewInflated.findViewById<EditText>(R.id.usernameInput).text.toString(),
                             encryptedPassword,
-                            extractedStringFromDate)
+                            extractedStringFromDate,
+                            notificationID)
+                        viewModel.addItem(newItem)
+                        passwordCollection.document(newItem.siteName).set(newItem)
 
-                        if(expireCheckBox.isChecked) scheduleNotification(
+                        scheduleNotification(
+                            expireCheckBox,
                             viewInflated.findViewById<EditText>(R.id.siteNameInput).text.toString(),
                             viewModel.user.email,
                             datePicker,
                             notificationID)
-
-                        viewModel.addItem(newItem)
-                        userRef.collection("Passwords").document(newItem.siteName).set(newItem)
-                        userRef.collection("Passwords").document(newItem.siteName).update(notificationMap as Map<String, Int>)
+                        passwordCollection.document(newItem.siteName).update(databaseNotificationID as Map<String, Int>)
 
                         viewModel.passwordList.observe(viewLifecycleOwner) { passwordList ->
                             val decryptedPasswordList = observeDecryptedPasswords(passwordList)
                             binding.recyclerView.adapter = PasswordAdapter(decryptedPasswordList, {
                                     cancelNotification(notificationID)
-                                    userRef.collection("Passwords").document(it.siteName).delete()
+                                    passwordCollection.document(it.siteName).delete()
                                     viewModel.removeItem(it)
                                 }, {})
                         }
@@ -232,64 +236,76 @@ class ListFragment : Fragment() {
                     // Add a pin
                     else if(viewModel.imageClicked == 2) {
                         val encryptedPin: String = AESEncyption.encrypt(viewInflated.findViewById<EditText>(R.id.pinInput).text.toString())
-
-                        if(encryptedPin == "-") {
-                            Toast.makeText(requireContext(), "Something gone wrong, retry or contact the assistance.", Toast.LENGTH_SHORT).show()
+                        if(!encryptionSucceed(encryptedPin)) {
                             alertDialog.dismiss()
+                            return@setOnClickListener
                         }
 
                         val newItem = Pin(
                             viewInflated.findViewById<EditText>(R.id.pinDescriptionInput).text.toString(),
                             encryptedPin,
-                            extractedStringFromDate)
+                            extractedStringFromDate,
+                            notificationID)
+                        viewModel.addItem(newItem)
+                        pinCollection.document(newItem.description).set(newItem)
 
-                        if(expireCheckBox.isChecked) scheduleNotification(
+                        scheduleNotification(
+                            expireCheckBox,
                             viewInflated.findViewById<EditText>(R.id.pinDescriptionInput).text.toString(),
                             viewModel.user.email,
                             datePicker,
                             notificationID)
+                        pinCollection.document(newItem.description).update(databaseNotificationID as Map<String, Int>)
 
-                        viewModel.addItem(newItem)
-                        userRef.collection("Pins").document(newItem.description).set(newItem)
-                        userRef.collection("Pins").document(newItem.description).update(notificationMap as Map<String, Int>)
                         viewModel.pinList.observe(viewLifecycleOwner) { pinList ->
                             val decryptedPinList = observeDecryptedPins(pinList)
                             binding.recyclerView.adapter = PinAdapter(decryptedPinList, {
                                     cancelNotification(notificationID)
-                                    userRef.collection("Pins").document(it.description).delete()
+                                    pinCollection.document(it.description).delete()
                                     viewModel.removeItem(it)
                                 }, {})
                         }
                     }
                     // Add a credit card
                     else if(viewModel.imageClicked == 3) {
-                        val encryptedNumber: String = AESEncyption.encrypt(viewInflated.findViewById<EditText>(R.id.cardNumberInput).text.toString())
-                        val encryptedSecurityCode: String = AESEncyption.encrypt(viewInflated.findViewById<EditText>(R.id.cardSafetyCodeInput).text.toString())
+                        val description = viewInflated.findViewById<EditText>(R.id.cardDescriptionInput).text.toString()
+                        val number = viewInflated.findViewById<EditText>(R.id.cardNumberInput).text.toString()
+                        val securityCode = viewInflated.findViewById<EditText>(R.id.cardSafetyCodeInput).text.toString()
 
-                        if(encryptedNumber == "-" || encryptedSecurityCode == "-") {
-                            Toast.makeText(requireContext(), "Something gone wrong, retry or contact the assistance.", Toast.LENGTH_SHORT).show()
+                        if(number.length != 16 || securityCode.length != 3){
+                            Toast.makeText(requireContext(), "Invalid card.", Toast.LENGTH_SHORT).show()
                             alertDialog.dismiss()
+                            return@setOnClickListener
+                        }
+                        val encryptedNumber: String = AESEncyption.encrypt(number)
+                        val encryptedSecurityCode: String = AESEncyption.encrypt(securityCode)
+                        if(!encryptionSucceed(encryptedNumber) || !encryptionSucceed(encryptedSecurityCode)) {
+                            alertDialog.dismiss()
+                            return@setOnClickListener
                         }
 
                         val newItem = CreditCard(
+                            description,
                             encryptedNumber,
                             encryptedSecurityCode,
-                            extractedStringFromDate)
+                            extractedStringFromDate,
+                            notificationID  )
+                        viewModel.addItem(newItem)
+                        ccCollection.document(newItem.description).set(newItem)
 
-                        if(expireCheckBox.isChecked) scheduleNotification(
-                            viewInflated.findViewById<EditText>(R.id.cardNumberInput).text.toString(),
+                        scheduleNotification(
+                            expireCheckBox,
+                            viewInflated.findViewById<EditText>(R.id.cardDescriptionInput).text.toString(),
                             viewModel.user.email,
                             datePicker,
                             notificationID)
+                        ccCollection.document(newItem.description).update(databaseNotificationID as Map<String, Int>)
 
-                        viewModel.addItem(newItem)
-                        userRef.collection("CreditCards").document(viewInflated.findViewById<EditText>(R.id.cardNumberInput).text.toString()).set(newItem)
-                        userRef.collection("CreditCards").document(viewInflated.findViewById<EditText>(R.id.cardNumberInput).text.toString()).update(notificationMap as Map<String, Int>)
                         viewModel.ccList.observe(viewLifecycleOwner) { ccList ->
                             val decryptedCCList = observeDecryptedCreditCards(ccList)
                             binding.recyclerView.adapter = CCAdapter(decryptedCCList, {
                                     cancelNotification(notificationID)
-                                    userRef.collection("CreditCards").document(it.number).delete()
+                                    ccCollection.document(it.description).delete()
                                     viewModel.removeItem(it)
                                 }, {})
                         }
@@ -299,12 +315,14 @@ class ListFragment : Fragment() {
                 }
             }
 
-            // Setup button to generate a random password
             if (viewModel.imageClicked == 1 || viewModel.imageClicked == 2) {
                 alertDialog.getButton(AlertDialog.BUTTON_NEUTRAL)?.setOnClickListener {
-                    val random = generateRandom(12)
-                    val item: EditText = if (viewModel.imageClicked == 1) viewInflated.findViewById(R.id.passwordInput)
-                                         else viewInflated.findViewById(R.id.pinInput)
+                    val random =
+                        if (viewModel.imageClicked == 1) generateRandomPassword(12)
+                        else generateRandomPin(8)
+                    val item: EditText =
+                        if (viewModel.imageClicked == 1) viewInflated.findViewById(R.id.passwordInput)
+                        else viewInflated.findViewById(R.id.pinInput)
                     item.setText(random)
                 }
             }

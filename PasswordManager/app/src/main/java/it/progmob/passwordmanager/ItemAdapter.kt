@@ -104,6 +104,7 @@ class PinAdapter(private val pins: List<Pin>, val longClick: (Pin) -> Unit, val 
 class CCAdapter(private val cards: List<CreditCard>, val longClick: (CreditCard) -> Unit, val onClick: (CreditCard) -> Unit) :
     RecyclerView.Adapter<CCAdapter.ViewHolder>() {
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val descriptionView: TextView = itemView.findViewById(R.id.descriptionCC)
         val cardNumberView: TextView = itemView.findViewById(R.id.cardNumberCC)
         val securityCodeView: TextView = itemView.findViewById(R.id.securityCodeCC)
         val dateView: TextView = itemView.findViewById(R.id.expirationCreditCardView)
@@ -121,6 +122,7 @@ class CCAdapter(private val cards: List<CreditCard>, val longClick: (CreditCard)
 
     override fun onBindViewHolder(holder: CCAdapter.ViewHolder, position: Int) {
         val card = cards[position]
+        holder.descriptionView.text = "Description: " + card.description
         holder.cardNumberView.text = "Number: **********"
         holder.securityCodeView.text = "Security Code: **********"
         holder.dateView.text = "Expiration Date: " + card.expirationDate

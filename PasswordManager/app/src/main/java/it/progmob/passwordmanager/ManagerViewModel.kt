@@ -115,7 +115,7 @@ class ManagerViewModel : ViewModel() {
         val ccList = _ccList.value ?: mutableListOf()
 
         // Check if the subject with the same name already exists
-        val ccToDelete = ccList.find { it.number == cc.number }
+        val ccToDelete = ccList.find { it.description == cc.description }
 
         ccList.remove(ccToDelete)
 
