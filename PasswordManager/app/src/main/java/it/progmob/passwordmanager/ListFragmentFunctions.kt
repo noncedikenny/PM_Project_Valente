@@ -171,13 +171,13 @@ internal fun ListFragment.resetFunction(collectionToDelete: String) {
                         // Cancella il documento
                         document.reference.delete()
                     }
+                    viewModel.reset()
+                    viewModel.fetchDataFromDatabase(viewModel.user.id)
                     Toast.makeText(requireContext(), "Everything has been deleted correctly.", Toast.LENGTH_LONG).show()
                 }
             }
 
         alertDialog.dismiss()
-
-        viewModel.reset()
     }
 }
 
