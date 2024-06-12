@@ -64,10 +64,10 @@ internal fun ListFragment.scheduleNotification(checkBox: CheckBox, itemName: Str
     val workManager = WorkManager.getInstance(requireContext())
     workManager.enqueue(myWorkRequest)
 
-    val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
-    val msg = dateFormat.format(calendar.time)
+    //val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+    //val msg = dateFormat.format(calendar.time)
 
-    Toast.makeText(requireContext(), "Programmato in data: $msg", Toast.LENGTH_LONG).show()
+    //Toast.makeText(requireContext(), "Programmato in data: $msg", Toast.LENGTH_LONG).show()
 }
 
 internal fun ListFragment.cancelNotification(notificationID: Int) {
@@ -222,6 +222,31 @@ internal fun ListFragment.encryptionSucceed(fieldToCheck: String) : Boolean {
         return false
     }
     return true
+}
+
+internal fun ListFragment.clearFormFields(shownList: CharSequence, viewInflated: View) {
+    when (shownList) {
+        "Passwords" -> {
+            viewInflated.findViewById<EditText>(R.id.siteNameInput).text.clear()
+            viewInflated.findViewById<EditText>(R.id.usernameInput).text.clear()
+            viewInflated.findViewById<EditText>(R.id.passwordInput).text.clear()
+            viewInflated.findViewById<CheckBox>(R.id.expirePasswordCheckBox).isChecked = false
+        }
+        "Pins" -> {
+            viewInflated.findViewById<EditText>(R.id.pinDescriptionInput).text.clear()
+            viewInflated.findViewById<EditText>(R.id.pinInput).text.clear()
+            viewInflated.findViewById<CheckBox>(R.id.expirePinCheckBox).isChecked = false
+        }
+        "Credit Cards" -> {
+            viewInflated.findViewById<EditText>(R.id.cardDescriptionInput).text.clear()
+            viewInflated.findViewById<EditText>(R.id.cardNumberInput).text.clear()
+            viewInflated.findViewById<EditText>(R.id.cardSafetyCodeInput).text.clear()
+            viewInflated.findViewById<CheckBox>(R.id.expireCreditCardCheckBox).isChecked = false
+        }
+        else -> {
+            Toast.makeText(requireContext(), "Something gone wrong, retry or contact the assistance.", Toast.LENGTH_SHORT).show()
+        }
+    }
 }
 
 fun generateRandomPassword(length: Int): String {

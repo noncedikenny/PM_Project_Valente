@@ -151,7 +151,7 @@ class CCAdapter(private val cards: List<CreditCard>, val longClick: (CreditCard)
 
 }
 
-class UserAdapter(private val users: List<User>, val clickListener: (User) -> Unit) :
+class UserAdapter(private val users: List<User>, val clickListener: (User) -> Unit, val longClickListener: (User) -> Unit) :
     RecyclerView.Adapter<UserAdapter.ViewHolder>() {
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val emailUserView: TextView = itemView.findViewById(R.id.emailUser)
@@ -174,6 +174,10 @@ class UserAdapter(private val users: List<User>, val clickListener: (User) -> Un
 
         holder.itemView.setOnClickListener {
             clickListener(user)
+        }
+        holder.itemView.setOnLongClickListener {
+            longClickListener(user)
+            true
         }
     }
 

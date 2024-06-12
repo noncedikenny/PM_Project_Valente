@@ -25,6 +25,7 @@ class ManagerViewModel : ViewModel() {
 
     var imageClicked: Int = 0
     var user: User = User("", "")
+    var isOperator: Boolean = false
 
     fun addItem(password: Password) {
         val passwordList = _passwordList.value ?: mutableListOf()
@@ -87,6 +88,25 @@ class ManagerViewModel : ViewModel() {
         _ccList.value = ccList
     }
 
+    fun addUser(user: User) {
+        val usersList = _usersList.value ?: mutableListOf()
+
+        // Check if the subject with the same name already exists
+        val existingUser = usersList.find { it.id == user.id }
+
+        if (existingUser != null) {
+            // Update the existing subject with the new grade and credits
+            existingUser.id = user.id
+            existingUser.email = user.email
+        } else {
+            // Add the new subject to the list
+            usersList.add(user)
+        }
+
+        // Update the LiveData with the modified list
+        _usersList.value = usersList
+    }
+
     fun removeItem(password: Password) {
         val passwordList = _passwordList.value ?: mutableListOf()
 
@@ -121,6 +141,18 @@ class ManagerViewModel : ViewModel() {
 
         // Update the LiveData with the modified list
         _ccList.value = ccList
+    }
+
+    fun removeUser(user: User) {
+        val usersList = _usersList.value ?: mutableListOf()
+
+        // Check if the subject with the same name already exists
+        val userToDelete = usersList.find { it.id == user.id }
+
+        usersList.remove(userToDelete)
+
+        // Update the LiveData with the modified list
+        _usersList.value = usersList
     }
 
     fun reset() {

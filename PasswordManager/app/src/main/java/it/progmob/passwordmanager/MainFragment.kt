@@ -20,6 +20,9 @@ import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.firestore
 import it.progmob.passwordmanager.databinding.MainFragmentBinding
 import java.util.Calendar
 
@@ -38,14 +41,22 @@ class MainFragment : Fragment() {
         (activity as AppCompatActivity).supportActionBar?.title = "Main menu"
         binding = MainFragmentBinding.inflate(inflater, container, false)
 
+        val user = FirebaseAuth.getInstance().currentUser
+        val db = Firebase.firestore
+
+        var isOp = false
+
+        db.collection("users").document(user!!.uid).get()
+            .addOnSuccessListener { document ->
+                val userRole = document.getString("role")
+                if(userRole == "user") isOp = false
+                else if (userRole == "operator") isOp = true
+            }
+
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                viewModel.usersList.observe(viewLifecycleOwner) { users ->
-                    if (users.size > 1) {
-                        // Perform existing functionality
-                        view?.let { Navigation.findNavController(it).navigate(R.id.action_mainFragment_to_usersFragment) }
-                    }
-                }
+                // Perform navigation back
+                if (isOp) view?.let { Navigation.findNavController(it).navigate(R.id.action_mainFragment_to_usersFragment) }
             }
         })
 
@@ -69,31 +80,6 @@ class MainFragment : Fragment() {
         binding.ccImageView.setOnClickListener {
             Navigation.findNavController(view).navigate(R.id.action_mainFragment_to_listFragment)
             viewModel.imageClicked = 3
-        }
-
-        binding.backButton.setOnClickListener {
-            val notificationID = System.currentTimeMillis().toInt()
-
-            val calendar = Calendar.getInstance()
-            val time = calendar.timeInMillis + 10 * 1000
-
-            // Create the WorkRequest
-            val inputData = Data.Builder()
-                .putString("itemName", "Oggetto")
-                .putString("userEmail", "Email")
-                .putInt("notificationID", notificationID)
-                .putLong("triggerTime", time)
-                .build()
-
-            val myWorkRequest: WorkRequest = OneTimeWorkRequestBuilder<NotificationWorker>()
-                .setInputData(inputData)
-                .build()
-
-            // Enqueue the WorkRequest
-            val workManager = WorkManager.getInstance(requireContext())
-            workManager.enqueue(myWorkRequest)
-
-            Toast.makeText(requireContext(), "Alarm set.", Toast.LENGTH_LONG).show()
         }
 
     }

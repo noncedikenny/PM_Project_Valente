@@ -17,6 +17,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
 import it.progmob.passwordmanager.databinding.ListFragmentBinding
 import java.util.Calendar
@@ -59,6 +60,12 @@ class ListFragment : Fragment() {
         val pinCollection = userRef.collection("Pins")
         val ccCollection = userRef.collection("CreditCards")
 
+        if (viewModel.user.id != FirebaseAuth.getInstance().currentUser!!.uid)
+            binding.resetAllButton.visibility = View.GONE
+
+        if (viewModel.user.id != FirebaseAuth.getInstance().currentUser!!.uid)
+            binding.addItem.visibility = View.GONE
+
         /*
         * This part loads the wanted list to observe, through the image clicked in the main fragment.
         * Every Adapter is created with three parameters: the list to update, long click listener, click listener.
@@ -79,9 +86,11 @@ class ListFragment : Fragment() {
                 viewModel.passwordList.observe(viewLifecycleOwner) { passwordList ->
                     val decryptedPasswordList = observeDecryptedPasswords(passwordList)
                     binding.recyclerView.adapter = PasswordAdapter(decryptedPasswordList, {
-                        cancelNotification(it.notificationID)
-                        passwordCollection.document(it.siteName).delete()
-                        viewModel.removeItem(it)
+                        if (viewModel.user.id == FirebaseAuth.getInstance().currentUser!!.uid) {
+                            cancelNotification(it.notificationID)
+                            passwordCollection.document(it.siteName).delete()
+                            viewModel.removeItem(it)
+                        }
                     }, {})
                 }
                 binding.itemNameView.text = "Passwords"
@@ -101,9 +110,11 @@ class ListFragment : Fragment() {
                 viewModel.pinList.observe(viewLifecycleOwner) { pinList ->
                     val decryptedPinList = observeDecryptedPins(pinList)
                     binding.recyclerView.adapter = PinAdapter(decryptedPinList, {
-                        cancelNotification(it.notificationID)
-                        pinCollection.document(it.description).delete()
-                        viewModel.removeItem(it)
+                        if (viewModel.user.id == FirebaseAuth.getInstance().currentUser!!.uid) {
+                            cancelNotification(it.notificationID)
+                            pinCollection.document(it.description).delete()
+                            viewModel.removeItem(it)
+                        }
                     }, {})
                 }
                 binding.itemNameView.text = "Pins"
@@ -123,9 +134,11 @@ class ListFragment : Fragment() {
                 viewModel.ccList.observe(viewLifecycleOwner) { ccList ->
                     val decryptedCCList = observeDecryptedCreditCards(ccList)
                     binding.recyclerView.adapter = CCAdapter(decryptedCCList, {
-                        cancelNotification(it.notificationID)
-                        ccCollection.document(it.description).delete()
-                        viewModel.removeItem(it)
+                        if (viewModel.user.id == FirebaseAuth.getInstance().currentUser!!.uid) {
+                            cancelNotification(it.notificationID)
+                            ccCollection.document(it.description).delete()
+                            viewModel.removeItem(it)
+                        }
                     }, {})
                 }
                 binding.itemNameView.text = "Credit Cards"
@@ -161,6 +174,8 @@ class ListFragment : Fragment() {
             }
         }
 
+
+
         /*
         * This part sets the on click listener of the button which adds a new item to the recycler view / database.
         * 2 parts: Builder setup, AlertDialog setup
@@ -170,6 +185,10 @@ class ListFragment : Fragment() {
             // Check if the popup was removed from parent correctly, if not remove it
             val parent = viewInflated.parent as? ViewGroup
             parent?.removeView(viewInflated)
+
+            // Reset fields
+            clearFormFields(binding.itemNameView.text, viewInflated)
+            datePicker.visibility = View.GONE
 
             // Setup builder to build the popup
             val dialogBuilder = AlertDialog.Builder(requireContext())
@@ -197,7 +216,6 @@ class ListFragment : Fragment() {
                                                   else "Doesn't expire."
                     val notificationID = if (expireCheckBox.isChecked) System.currentTimeMillis().toInt()
                                          else 0
-                    val databaseNotificationID = hashMapOf("notificationID" to notificationID)
 
                     // Add a password
                     if(viewModel.imageClicked == 1) {
@@ -222,7 +240,6 @@ class ListFragment : Fragment() {
                             viewModel.user.email,
                             datePicker,
                             notificationID)
-                        passwordCollection.document(newItem.siteName).update(databaseNotificationID as Map<String, Int>)
 
                         viewModel.passwordList.observe(viewLifecycleOwner) { passwordList ->
                             val decryptedPasswordList = observeDecryptedPasswords(passwordList)
@@ -255,7 +272,6 @@ class ListFragment : Fragment() {
                             viewModel.user.email,
                             datePicker,
                             notificationID)
-                        pinCollection.document(newItem.description).update(databaseNotificationID as Map<String, Int>)
 
                         viewModel.pinList.observe(viewLifecycleOwner) { pinList ->
                             val decryptedPinList = observeDecryptedPins(pinList)
@@ -289,7 +305,7 @@ class ListFragment : Fragment() {
                             encryptedNumber,
                             encryptedSecurityCode,
                             extractedStringFromDate,
-                            notificationID  )
+                            notificationID)
                         viewModel.addItem(newItem)
                         ccCollection.document(newItem.description).set(newItem)
 
@@ -299,7 +315,6 @@ class ListFragment : Fragment() {
                             viewModel.user.email,
                             datePicker,
                             notificationID)
-                        ccCollection.document(newItem.description).update(databaseNotificationID as Map<String, Int>)
 
                         viewModel.ccList.observe(viewLifecycleOwner) { ccList ->
                             val decryptedCCList = observeDecryptedCreditCards(ccList)

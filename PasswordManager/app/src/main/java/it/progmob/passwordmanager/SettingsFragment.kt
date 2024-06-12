@@ -33,6 +33,27 @@ class SettingsFragment : Fragment() {
     ): View {
         (activity as AppCompatActivity).supportActionBar?.title = "Settings"
         binding = SettingsFragmentBinding.inflate(inflater, container, false)
+
+        val user = FirebaseAuth.getInstance().currentUser
+        val db = Firebase.firestore
+
+        var isOp = false
+
+        db.collection("users").document(user!!.uid).get()
+            .addOnSuccessListener { document ->
+                val userRole = document.getString("role")
+                if(userRole == "user") isOp = false
+                else if (userRole == "operator") isOp = true
+            }
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                // Perform navigation back
+                if (isOp) view?.let { Navigation.findNavController(it).navigate(R.id.action_settingsFragment_to_usersFragment) }
+                else view?.let { Navigation.findNavController(it).navigate(R.id.action_settingsFragment_to_mainFragment) }
+            }
+        })
+
         return binding.root
     }
 
@@ -41,9 +62,20 @@ class SettingsFragment : Fragment() {
 
         val currentUser = FirebaseAuth.getInstance().currentUser
 
+        val db = Firebase.firestore
+        var isOp = false
+
+        db.collection("users").document(currentUser!!.uid).get()
+            .addOnSuccessListener { document ->
+                val userRole = document.getString("role")
+                if(userRole == "user") isOp = false
+                else if (userRole == "operator") isOp = true
+            }
+
         binding.emailView.text = "You're: " + currentUser!!.email.toString()
 
-        binding.associatedUsersLenView.text = "Associated users: " + viewModel.usersList.value!!.size
+        binding.associatedUsersLenView.text = if(isOp) "Associated users: " + viewModel.usersList.value!!.size
+                                              else "You're an user."
 
         binding.logoutButton.setOnClickListener {
             AuthUI.getInstance()

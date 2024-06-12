@@ -56,6 +56,7 @@ class MainActivity : AppCompatActivity() {
                         val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
                         startActivity(intent)
                         Toast.makeText(this, "You'll receive notifications if an item expires.", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, "Enable alarms in settings and come here again.", Toast.LENGTH_LONG).show()
                         return
                     }
                 }
@@ -72,16 +73,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val navController = findNavController(R.id.nav_host)
-        return item.onNavDestinationSelected(navController) ||
-                super.onOptionsItemSelected(item)
+        return when (item.itemId) {
+            R.id.settingsFragment -> {
+                findNavController(R.id.nav_host).navigate(R.id.settingsFragment)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
+
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Create the NotificationChannel.
-            val name = "Notification Channel"
-            val descriptionText = "Channel for notifications"
+            val name = "PasswordManager Notification Channel"
+            val descriptionText = "Channel for PasswordManager notifications"
             val importance = NotificationManager.IMPORTANCE_DEFAULT
             val mChannel = NotificationChannel(channelID, name, importance)
             mChannel.description = descriptionText
