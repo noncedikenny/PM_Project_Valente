@@ -6,25 +6,67 @@
     android:layout_height="match_parent">
 
     <Button
-        android:id="@+id/resetButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Reset"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.507"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.409" />
-
-    <Button
         android:id="@+id/logoutButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginBottom="64dp"
         android:text="Logout"
-        app:layout_constraintEnd_toEndOf="@+id/resetButton"
-        app:layout_constraintStart_toStartOf="@+id/resetButton"
-        app:layout_constraintTop_toBottomOf="@+id/resetButton" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/appName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="Password Manager"
+        android:textSize="32dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/emailView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="You're: "
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="@+id/appName"
+        app:layout_constraintStart_toStartOf="@+id/appName"
+        app:layout_constraintTop_toBottomOf="@+id/appName" />
+
+    <TextView
+        android:id="@+id/associatedUsersLenView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Associated users: "
+        app:layout_constraintEnd_toEndOf="@+id/emailView"
+        app:layout_constraintHorizontal_bias="0.538"
+        app:layout_constraintStart_toStartOf="@+id/emailView"
+        app:layout_constraintTop_toBottomOf="@+id/emailView" />
+
+    <TextView
+        android:id="@+id/companyView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Your company: ProgMob SRL"
+        app:layout_constraintEnd_toEndOf="@+id/associatedUsersLenView"
+        app:layout_constraintStart_toStartOf="@+id/associatedUsersLenView"
+        app:layout_constraintTop_toBottomOf="@+id/associatedUsersLenView" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="App Version: 1.00"
+        android:textColor="#B5B5B5"
+        android:textSize="10sp"
+        app:layout_constraintBottom_toTopOf="@+id/logoutButton"
+        app:layout_constraintEnd_toEndOf="@+id/logoutButton"
+        app:layout_constraintStart_toStartOf="@+id/logoutButton" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

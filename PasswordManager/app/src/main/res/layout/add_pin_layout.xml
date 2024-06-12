@@ -3,7 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="350dp"
-    android:layout_height="350dp">
+    android:layout_height="500dp">
+
+    <DatePicker
+        android:id="@+id/expirationPinInput"
+        android:layout_width="256dp"
+        android:layout_height="138dp"
+        android:layout_marginTop="16dp"
+        android:calendarViewShown="false"
+        android:datePickerMode="spinner"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@+id/expirePinCheckBox"
+        app:layout_constraintStart_toStartOf="@+id/expirePinCheckBox"
+        app:layout_constraintTop_toBottomOf="@+id/expirePinCheckBox" />
 
     <EditText
         android:id="@+id/pinDescriptionInput"
@@ -29,5 +41,15 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/pinDescriptionInput"
         app:layout_constraintTop_toBottomOf="@+id/pinDescriptionInput" />
+
+    <CheckBox
+        android:id="@+id/expirePinCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Expires?"
+        app:layout_constraintEnd_toEndOf="@+id/pinInput"
+        app:layout_constraintStart_toStartOf="@+id/pinInput"
+        app:layout_constraintTop_toBottomOf="@+id/pinInput" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
